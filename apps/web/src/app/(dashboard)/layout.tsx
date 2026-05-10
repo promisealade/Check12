@@ -13,10 +13,11 @@ import type { User } from '../../lib/stores/auth.store';
 type Nav = { href: string; label: string; icon: IconName };
 
 const NAV_LINKS: Nav[] = [
-  { href: '/wallet', label: 'Wallet', icon: 'wallet' },
+  { href: '/wallet', label: 'Home', icon: 'wallet' },
   { href: '/transfer', label: 'Send', icon: 'send' },
   { href: '/convert', label: 'Convert', icon: 'swap' },
   { href: '/collections', label: 'Collect', icon: 'collect' },
+  { href: '/profile', label: 'Profile', icon: 'user' },
   { href: '/savings', label: 'Save', icon: 'bank' },
   { href: '/kyc', label: 'Verify', icon: 'id' },
 ];
