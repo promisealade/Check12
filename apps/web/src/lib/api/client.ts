@@ -43,7 +43,8 @@ apiClient.interceptors.response.use(
   async (error: unknown) => {
     const axiosError = error as {
       response?: { status: number };
-      config: { _retry?: boolean } & Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      config: any;
     };
 
     if (axiosError.response?.status === 401 && !axiosError.config._retry) {
