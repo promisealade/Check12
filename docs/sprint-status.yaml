@@ -1,0 +1,169 @@
+version: "6.0.0"
+project_name: "Check12"
+project_level: 2
+scope: "prototype"
+current_sprint: 3
+sprint_plan_path: "docs/sprint-plan-check12-2026-05-09.md"
+
+team:
+  size: 2
+  experience: "mid"
+  sprint_length_weeks: 2
+  capacity_per_sprint: 40
+  committed_per_sprint: 32
+
+sprints:
+  - sprint_number: 1
+    start_date: "2026-05-12"
+    end_date: "2026-05-22"
+    capacity_points: 40
+    committed_points: 31
+    completed_points: 31
+    status: "completed"
+    goal: "Foundation, authentication, tiered KYC, and a live event-sourced wallet users can fund"
+    stories:
+      - story_id: "STORY-INF-001"
+        title: "Project setup (monorepo, Docker Compose, shared types)"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-INF-002"
+        title: "DB schema, migrations & seed data"
+        points: 3
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S001"
+        title: "User registration & login"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S002"
+        title: "KYC tier simulation"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S003"
+        title: "Business registration & KYB (mock)"
+        points: 3
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S004"
+        title: "Wallet dashboard (event-sourced ledger)"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S005"
+        title: "Mock fiat on-ramp"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+
+  - sprint_number: 2
+    start_date: "2026-05-25"
+    end_date: "2026-06-05"
+    capacity_points: 40
+    committed_points: 26
+    completed_points: 26
+    status: "completed"
+    goal: "Full stablecoin operations — conversion, transfers, merchant collections, transaction history"
+    stories:
+      - story_id: "STORY-S006"
+        title: "Stablecoin conversion (mock oracle)"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S007"
+        title: "Digital savings accounts (AFRi)"
+        points: 3
+        priority: "should"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S008"
+        title: "Transaction history & statement export"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S009"
+        title: "Cross-border transfer (mock settlement)"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S010"
+        title: "Merchant payment link & QR code"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S011"
+        title: "Guest payment flow (mock MoMo)"
+        points: 3
+        priority: "should"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+
+  - sprint_number: 3
+    start_date: "2026-06-08"
+    end_date: "2026-06-19"
+    capacity_points: 40
+    committed_points: 14
+    completed_points: 14
+    status: "completed"
+    goal: "Admin dashboard, reserve reconciliation, API demo, notifications, and demo-ready polish"
+    stories:
+      - story_id: "STORY-S012"
+        title: "In-app notifications"
+        points: 3
+        priority: "should"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S013"
+        title: "Admin dashboard (KYC queue, metrics, AML alerts)"
+        points: 5
+        priority: "must"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S014"
+        title: "Reserve reconciliation display"
+        points: 3
+        priority: "should"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+      - story_id: "STORY-S015"
+        title: "Third-party API demo"
+        points: 3
+        priority: "could"
+        status: "completed"
+        completed_date: "2026-05-09"
+        assigned_to: null
+
+velocity:
+  sprint_1: 31
+  sprint_2: 26
+  sprint_3: 14
+  rolling_average: 24
