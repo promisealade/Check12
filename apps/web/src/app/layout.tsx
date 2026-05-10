@@ -6,8 +6,9 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Check12 — Dual Stablecoin Platform',
+  title: 'AfriOne — Dual Stablecoin Platform',
   description: 'Cross-border payments, digital savings, and business collections across Africa',
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -56,8 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Top nav */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/wallet" className="font-bold text-brand-600 text-lg">
-            Check12
+          <Link href="/wallet" className="font-bold text-brand-500 text-lg tracking-tight">
+            AfriOne
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/notifications" className="relative text-gray-400 hover:text-gray-600">

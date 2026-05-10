@@ -80,9 +80,9 @@ export default function ApiDemoPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Check12 API Demo</h1>
-        <p className="text-gray-500 mt-2">
-          Live interactive demo of the Check12 stablecoin platform API
+        <h1 className="text-3xl font-bold text-body">AfriOne API Demo</h1>
+        <p className="text-body/60 mt-2">
+          Live interactive demo of the AfriOne stablecoin platform API
         </p>
         <p className="text-sm text-gray-400 mt-1">
           Sign in at{' '}
@@ -171,7 +171,7 @@ export default function ApiDemoPage() {
       </div>
 
       <div className="text-center text-xs text-gray-400 py-4">
-        Check12 Prototype v0.1 · Built with NestJS + Next.js + PostgreSQL + Redis
+        AfriOne Prototype v0.1 · Built with NestJS + Next.js + PostgreSQL + Redis
       </div>
     </div>
   );
