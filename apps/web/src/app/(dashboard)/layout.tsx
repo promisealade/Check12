@@ -17,9 +17,8 @@ const NAV_LINKS: Nav[] = [
   { href: '/transfer', label: 'Send', icon: 'send' },
   { href: '/convert', label: 'Convert', icon: 'swap' },
   { href: '/collections', label: 'Collect', icon: 'collect' },
-  { href: '/profile', label: 'Profile', icon: 'user' },
   { href: '/savings', label: 'Save', icon: 'bank' },
-  { href: '/kyc', label: 'Verify', icon: 'id' },
+  { href: '/profile', label: 'Profile', icon: 'user' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -121,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-muted-100 flex z-10">
-        {NAV_LINKS.slice(0, 5).map(({ href, label, icon }) => {
+        {NAV_LINKS.map(({ href, label, icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/');
           return (
             <Link
