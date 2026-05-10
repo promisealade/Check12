@@ -38,3 +38,4 @@ coverage/
 
 # Uploads (local dev)
 apps/api/uploads/
+.vercel
