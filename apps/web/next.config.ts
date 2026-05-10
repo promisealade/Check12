@@ -1,7 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@check12/shared-types'],
   experimental: {
     typedRoutes: true,
   },

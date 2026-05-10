@@ -13,7 +13,6 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@check12/shared-types": "workspace:*",
     "@tanstack/react-query": "^5.28.0",
     "axios": "^1.6.8",
     "clsx": "^2.1.0",

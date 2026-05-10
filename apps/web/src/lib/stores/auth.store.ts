@@ -1,5 +1,21 @@
 import { create } from 'zustand';
-import type { User } from '@check12/shared-types';
+
+export type KycTier = 0 | 1 | 2;
+export type UserType = 'individual' | 'business';
+export type KycStatus = 'pending' | 'approved' | 'rejected' | 'requires_more_info';
+
+export interface User {
+  id: string;
+  phone: string;
+  email: string;
+  type: UserType;
+  role?: string;
+  tier: KycTier;
+  kycStatus: KycStatus;
+  businessName?: string;
+  registrationNumber?: string;
+  createdAt: string;
+}
 
 interface AuthState {
   user: User | null;
