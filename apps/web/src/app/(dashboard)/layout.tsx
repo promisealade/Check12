@@ -12,11 +12,20 @@ import type { User } from '../../lib/stores/auth.store';
 
 type Nav = { href: string; label: string; icon: IconName };
 
-const NAV_LINKS: Nav[] = [
+const INDIVIDUAL_NAV: Nav[] = [
   { href: '/wallet', label: 'Home', icon: 'wallet' },
   { href: '/transfer', label: 'Send', icon: 'send' },
   { href: '/convert', label: 'Convert', icon: 'swap' },
   { href: '/collections', label: 'Collect', icon: 'collect' },
+  { href: '/savings', label: 'Save', icon: 'bank' },
+  { href: '/profile', label: 'Profile', icon: 'user' },
+];
+
+const BUSINESS_NAV: Nav[] = [
+  { href: '/wallet', label: 'Home', icon: 'wallet' },
+  { href: '/collections', label: 'Collect', icon: 'collect' },
+  { href: '/transfer', label: 'Send', icon: 'send' },
+  { href: '/convert', label: 'Convert', icon: 'swap' },
   { href: '/savings', label: 'Save', icon: 'bank' },
   { href: '/profile', label: 'Profile', icon: 'user' },
 ];
@@ -26,6 +35,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { user, setUser, isAuthenticated } = useAuthStore();
   const { logout } = useAuth();
+  const isBusiness = user?.type === 'business';
+  const NAV_LINKS = isBusiness ? BUSINESS_NAV : INDIVIDUAL_NAV;
 
   const { data: profile } = useQuery({
     queryKey: ['user-me'],

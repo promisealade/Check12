@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
+import { useAuthStore } from '../../../lib/stores/auth.store';
 import { Icon } from '../../../lib/icons';
 
 type Currency = 'AFRi' | 'xGHS';
@@ -27,6 +28,8 @@ const STATUS_BADGE: Record<string, string> = {
 
 export default function CollectionsPage() {
   const qc = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+  const isBusiness = user?.type === 'business';
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ amount: '', currency: 'AFRi' as Currency, description: '', expiresInHours: 72 });
   const [error, setError] = useState('');
@@ -56,17 +59,45 @@ export default function CollectionsPage() {
     });
   }
 
+  const totalCollected = links
+    .filter((l) => l.status === 'paid')
+    .reduce((acc, l) => acc + parseFloat(l.amount), 0);
+  const activeCount = links.filter((l) => l.status === 'active').length;
+  const paidCount = links.filter((l) => l.status === 'paid').length;
+
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="h1">Payment collections</h1>
-          <p className="subtle mt-1">Create links for customers to pay you.</p>
+          <h1 className="h1">{isBusiness ? 'Collections' : 'Payment collections'}</h1>
+          <p className="subtle mt-1">
+            {isBusiness
+              ? `${user?.businessName ?? 'Your business'} · accept payments via link`
+              : 'Create links for others to pay you.'}
+          </p>
         </div>
         <button className="btn-primary" onClick={() => setShowForm(true)}>
           <Icon name="plus" className="w-4 h-4" /> New link
         </button>
       </div>
+
+      {/* Business revenue summary */}
+      {isBusiness && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white rounded-[20px] ring-1 ring-muted-100 shadow-pop p-4 text-center">
+            <p className="font-display text-xl font-semibold text-brand-700 tabular-nums">{totalCollected.toFixed(2)}</p>
+            <p className="text-xs text-muted-500 mt-0.5">Total collected</p>
+          </div>
+          <div className="bg-white rounded-[20px] ring-1 ring-muted-100 shadow-pop p-4 text-center">
+            <p className="font-display text-xl font-semibold text-success-700 tabular-nums">{activeCount}</p>
+            <p className="text-xs text-muted-500 mt-0.5">Active</p>
+          </div>
+          <div className="bg-white rounded-[20px] ring-1 ring-muted-100 shadow-pop p-4 text-center">
+            <p className="font-display text-xl font-semibold text-brand-700 tabular-nums">{paidCount}</p>
+            <p className="text-xs text-muted-500 mt-0.5">Paid</p>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="card space-y-4">

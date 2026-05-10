@@ -56,6 +56,7 @@ const RATE_AFRI_TO_GHS = 14.82;
 export default function WalletPage() {
   const user = useAuthStore((s) => s.user);
   const [balanceHidden, setBalanceHidden] = useState(false);
+  const isBusiness = user?.type === 'business';
 
   const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ['wallet-dashboard'],
@@ -63,7 +64,6 @@ export default function WalletPage() {
     refetchInterval: 30_000,
   });
 
-  // Pull a wider transaction window to compute 30-day stats
   const { data: txList } = useQuery<{ transactions: Transaction[] }>({
     queryKey: ['transactions-stats'],
     queryFn: async () =>
@@ -74,6 +74,13 @@ export default function WalletPage() {
     queryKey: ['savings'],
     queryFn: async () => (await apiClient.get<SavingsAccount[]>('/savings')).data,
   });
+
+  const { data: paymentLinksRaw } = useQuery({
+    queryKey: ['payment-links'],
+    queryFn: async () => (await apiClient.get<{ id: string; amount: string; status: string; currency: string }[]>('/collections/links')).data,
+    enabled: isBusiness,
+  });
+  const paymentLinks = paymentLinksRaw ?? [];
 
   if (isLoading) {
     return (
@@ -100,11 +107,18 @@ export default function WalletPage() {
   const xghsBalance = xghsWallet ? parseFloat(xghsWallet.balance) : 0;
   const totalGhs = afriBalance * RATE_AFRI_TO_GHS + xghsBalance;
 
-  const userName = user?.email?.split('@')[0]
+  const displayName = isBusiness && user?.businessName
+    ? user.businessName
+    : user?.email?.split('@')[0]
     ? user.email[0].toUpperCase() + user.email.split('@')[0].slice(1)
     : 'Friend';
 
   const stats = compute30dStats(txList?.transactions ?? []);
+
+  const activeLinks = paymentLinks.filter((l) => l.status === 'active').length;
+  const totalCollected = paymentLinks
+    .filter((l) => l.status === 'paid')
+    .reduce((acc, l) => acc + parseFloat(l.amount), 0);
 
   return (
     <div className="w-full py-8 px-4 lg:px-8 space-y-8 max-w-7xl mx-auto">
@@ -113,10 +127,17 @@ export default function WalletPage() {
         <div className="flex items-center gap-4">
           <BrandFlower className="w-12 h-12 text-gold-500 hidden md:block" />
           <div>
-            <p className="greeting leading-tight mb-1">Akwaaba</p>
-            <h1 className="text-2xl font-display font-semibold text-brand-700 leading-tight tracking-tight">
-              {userName}
-            </h1>
+            <p className="greeting leading-tight mb-1">{isBusiness ? 'Business dashboard' : 'Akwaaba'}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-display font-semibold text-brand-700 leading-tight tracking-tight">
+                {displayName}
+              </h1>
+              {isBusiness && (
+                <span className="text-xs font-semibold uppercase tracking-wider text-gold-700 bg-sand-100 px-2 py-0.5 rounded-full">
+                  Business
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
@@ -138,7 +159,7 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* 30-day stats strip */}
+      {/* Stats strip — differs by account type */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Total balance"
@@ -147,29 +168,55 @@ export default function WalletPage() {
           icon="wallet"
           tone="brand"
         />
-        <StatCard
-          label="Sent · 30 days"
-          value={`${stats.sent.toFixed(2)}`}
-          sub={`${stats.sentCount} transfer${stats.sentCount === 1 ? '' : 's'}`}
-          icon="arrowUpRight"
-          tone="gold"
-        />
-        <StatCard
-          label="Received · 30 days"
-          value={`${stats.received.toFixed(2)}`}
-          sub={`${stats.receivedCount} payment${stats.receivedCount === 1 ? '' : 's'}`}
-          icon="arrowDownLeft"
-          tone="sage"
-        />
-        <StatCard
-          label="Savings"
-          value={`${savings
-            .reduce((acc, s) => acc + parseFloat(s.balance), 0)
-            .toFixed(2)} AFRi`}
-          sub={`${savings.length} goal${savings.length === 1 ? '' : 's'}`}
-          icon="star"
-          tone="sand"
-        />
+        {isBusiness ? (
+          <>
+            <StatCard
+              label="Collected · all time"
+              value={balanceHidden ? '••••••' : `${totalCollected.toFixed(2)}`}
+              sub="from payment links"
+              icon="collect"
+              tone="gold"
+            />
+            <StatCard
+              label="Active links"
+              value={`${activeLinks}`}
+              sub={`${paymentLinks.length} total`}
+              icon="receipt"
+              tone="sage"
+            />
+            <StatCard
+              label="Sent · 30 days"
+              value={balanceHidden ? '••••••' : `GHS ${stats.sent.toFixed(2)}`}
+              sub={`${stats.sentCount} transfer${stats.sentCount === 1 ? '' : 's'}`}
+              icon="arrowUpRight"
+              tone="sand"
+            />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="Sent · 30 days"
+              value={balanceHidden ? '••••••' : `GHS ${stats.sent.toFixed(2)}`}
+              sub={`${stats.sentCount} transfer${stats.sentCount === 1 ? '' : 's'}`}
+              icon="arrowUpRight"
+              tone="gold"
+            />
+            <StatCard
+              label="Received · 30 days"
+              value={balanceHidden ? '••••••' : `GHS ${stats.received.toFixed(2)}`}
+              sub={`${stats.receivedCount} payment${stats.receivedCount === 1 ? '' : 's'}`}
+              icon="arrowDownLeft"
+              tone="sage"
+            />
+            <StatCard
+              label="Savings"
+              value={balanceHidden ? '••••••' : `${savings.reduce((acc, s) => acc + parseFloat(s.balance), 0).toFixed(2)} AFRi`}
+              sub={`${savings.length} goal${savings.length === 1 ? '' : 's'}`}
+              icon="star"
+              tone="sand"
+            />
+          </>
+        )}
       </div>
 
       {/* Wallet cards */}
@@ -222,15 +269,26 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions — business-first vs individual-first */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <QuickAction href="/transfer" label="Send" icon="arrowUpRight" tone="gold" />
-        <QuickAction href="/wallet/fund" label="Fund" icon="arrowDownLeft" tone="sage" />
-        <QuickAction href="/convert" label="Convert" icon="swap" tone="brand" />
-        <QuickAction href="/collections" label="Collect" icon="collect" tone="sand" />
+        {isBusiness ? (
+          <>
+            <QuickAction href="/collections" label="Collect" icon="collect" tone="gold" />
+            <QuickAction href="/transfer" label="Send" icon="arrowUpRight" tone="sage" />
+            <QuickAction href="/wallet/fund" label="Fund" icon="arrowDownLeft" tone="brand" />
+            <QuickAction href="/convert" label="Convert" icon="swap" tone="sand" />
+          </>
+        ) : (
+          <>
+            <QuickAction href="/transfer" label="Send" icon="arrowUpRight" tone="gold" />
+            <QuickAction href="/wallet/fund" label="Fund" icon="arrowDownLeft" tone="sage" />
+            <QuickAction href="/convert" label="Convert" icon="swap" tone="brand" />
+            <QuickAction href="/collections" label="Collect" icon="collect" tone="sand" />
+          </>
+        )}
       </div>
 
-      {/* Activity + Savings two-column */}
+      {/* Activity + side widget */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent activity */}
         <div className="lg:col-span-2">
@@ -259,8 +317,12 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {/* Savings widget */}
-        <SavingsWidget savings={savings} />
+        {/* Side widget: business → payment links summary; individual → savings */}
+        {isBusiness ? (
+          <BusinessLinksWidget links={paymentLinks} totalCollected={totalCollected} activeLinks={activeLinks} />
+        ) : (
+          <SavingsWidget savings={savings} />
+        )}
       </div>
 
       {/* Footer Badges */}
@@ -495,6 +557,80 @@ function friendlyDate(iso: string): string {
   }
   if (sameDay(d, yesterday)) return 'Yesterday';
   return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function BusinessLinksWidget({
+  links, totalCollected, activeLinks,
+}: {
+  links: { id: string; amount: string; status: string; currency: string }[];
+  totalCollected: number;
+  activeLinks: number;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h2 className="text-lg font-display font-medium text-brand-700">Payment links</h2>
+        <Link
+          href="/collections"
+          className="text-sm text-muted-500 hover:text-brand-700 font-medium bg-white px-4 py-2 rounded-full shadow-pop ring-1 ring-muted-100 transition-colors"
+        >
+          Manage
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-[32px] p-6 ring-1 ring-muted-100 shadow-card space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-sand-50 rounded-2xl p-3 text-center">
+            <p className="font-display text-xl font-semibold text-brand-700 tabular-nums">
+              {totalCollected.toFixed(2)}
+            </p>
+            <p className="text-xs text-muted-500 mt-0.5">Collected</p>
+          </div>
+          <div className="bg-sage-50 rounded-2xl p-3 text-center">
+            <p className="font-display text-xl font-semibold text-brand-700 tabular-nums">
+              {activeLinks}
+            </p>
+            <p className="text-xs text-muted-500 mt-0.5">Active links</p>
+          </div>
+        </div>
+
+        {links.length === 0 ? (
+          <div className="text-center space-y-3 py-2">
+            <div className="mx-auto w-10 h-10 rounded-2xl bg-sand-100 text-gold-700 flex items-center justify-center">
+              <Icon name="receipt" className="w-5 h-5" />
+            </div>
+            <p className="text-sm text-muted-500">No payment links yet.</p>
+            <Link href="/collections" className="btn-primary text-sm">
+              Create a link
+              <Icon name="plus" className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2 border-t border-muted-100 pt-4">
+              {links.slice(0, 3).map((l) => (
+                <div key={l.id} className="flex items-center justify-between text-sm">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    l.status === 'active' ? 'bg-success-500' : l.status === 'paid' ? 'bg-brand-400' : 'bg-muted-300'
+                  }`} />
+                  <span className="flex-1 mx-2 text-muted-500 capitalize">{l.status}</span>
+                  <span className="font-medium text-brand-700 tabular-nums">
+                    {parseFloat(l.amount).toFixed(2)} {l.currency}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Link
+              href="/collections"
+              className="block w-full text-center text-sm text-brand-700 ring-1 ring-inset ring-brand-100 rounded-xl py-2 hover:bg-brand-50 transition-colors"
+            >
+              + New payment link
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function BrandFlower({ className }: { className?: string }) {
