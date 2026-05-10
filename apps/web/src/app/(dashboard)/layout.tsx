@@ -38,10 +38,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated && !profile) {
-      const timer = setTimeout(() => router.replace('/login'), 1500);
-      return () => clearTimeout(timer);
-    }
+    const timer = !isAuthenticated && !profile
+      ? setTimeout(() => router.replace('/login'), 1500)
+      : null;
+    return () => { if (timer) clearTimeout(timer); };
   }, [isAuthenticated, profile, router]);
 
   // Notifications unread count
