@@ -227,7 +227,7 @@ export default function WalletPage() {
         <QuickAction href="/transfer" label="Send" icon="arrowUpRight" tone="gold" />
         <QuickAction href="/wallet/fund" label="Fund" icon="arrowDownLeft" tone="sage" />
         <QuickAction href="/convert" label="Convert" icon="swap" tone="brand" />
-        <QuickAction href="/collections" label="Cash out" icon="collect" tone="sand" />
+        <QuickAction href="/collections" label="Collect" icon="collect" tone="sand" />
       </div>
 
       {/* Activity + Savings two-column */}
