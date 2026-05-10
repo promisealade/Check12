@@ -1,4 +1,4 @@
-# Check12
+# Afrione
 
 Regulated dual-stablecoin VASP platform for cross-border payments, digital savings, and business collections across Africa.
 
@@ -17,8 +17,8 @@ Regulated dual-stablecoin VASP platform for cross-border payments, digital savin
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url> check12
-cd check12
+git clone <repo-url> afrione
+cd afrione
 pnpm install
 ```
 
@@ -57,7 +57,7 @@ pnpm dev
 ## Project Structure
 
 ```
-check12/
+afrione/
 ├── apps/
 │   ├── api/          # NestJS backend (port 3001)
 │   └── web/          # Next.js frontend (port 3000)
@@ -100,7 +100,7 @@ pnpm db:reset         # Drop, migrate, and re-seed database
 | Individual (Tier 2) | amara@example.com | Password123! | 2 |
 | Individual (Tier 1) | kofi@example.com | Password123! | 1 |
 | Business (approved) | akosua@sme.com | Password123! | 2 |
-| Admin | admin@check12.com | Admin@check12! | — |
+| Admin | admin@afrione.com | Admin@afrione! | — |
 
 ## Mock Integration Behaviour
 
@@ -114,13 +114,13 @@ pnpm db:reset         # Drop, migrate, and re-seed database
 
 ## Architecture
 
-See [`docs/architecture-check12-2026-05-09.md`](docs/architecture-check12-2026-05-09.md) for the full system design.
+See [`docs/architecture-afrione-2026-05-09.md`](docs/architecture-afrione-2026-05-09.md) for the full system design.
 
 ## Planning Documents
 
 | Document | Path |
 |----------|------|
-| Product Brief | `docs/product-brief-check12-2026-05-09.md` |
-| PRD | `docs/prd-check12-2026-05-09.md` |
-| Architecture | `docs/architecture-check12-2026-05-09.md` |
-| Sprint Plan | `docs/sprint-plan-check12-2026-05-09.md` |
+| Product Brief | `docs/product-brief-afrione-2026-05-09.md` |
+| PRD | `docs/prd-afrione-2026-05-09.md` |
+| Architecture | `docs/architecture-afrione-2026-05-09.md` |
+| Sprint Plan | `docs/sprint-plan-afrione-2026-05-09.md` |

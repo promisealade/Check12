@@ -1,5 +1,5 @@
 {
-  "name": "@check12/web",
+  "name": "@afrione/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -52,7 +52,7 @@
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
-      "^@check12/shared-types$": "<rootDir>/../../packages/shared-types/src"
+      "^@afrione/shared-types$": "<rootDir>/../../packages/shared-types/src"
     }
   }
 }

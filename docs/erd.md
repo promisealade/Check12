@@ -1,4 +1,4 @@
-# Entity Relationship Diagram — Check12
+# Entity Relationship Diagram — Afrione
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐

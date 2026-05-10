@@ -6,7 +6,7 @@
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@check12/shared-types": ["../../packages/shared-types/src"]
+      "@afrione/shared-types": ["../../packages/shared-types/src"]
     }
   },
   "include": ["src/**/*"],

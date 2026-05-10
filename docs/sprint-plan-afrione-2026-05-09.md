@@ -1,4 +1,4 @@
-# Sprint Plan: Check12 (Prototype)
+# Sprint Plan: Afrione (Prototype)
 
 **Date:** 2026-05-09
 **Scrum Master:** PromiseAlade
@@ -15,7 +15,7 @@
 
 ## Executive Summary
 
-This sprint plan delivers a fully functional Check12 prototype across three 2-week sprints. Sprint 1 establishes the foundation — project infrastructure, authentication, tiered KYC simulation, and the core event-sourced wallet. Sprint 2 delivers the full stablecoin operations layer (conversion, transfers, merchant collections). Sprint 3 completes the admin dashboard, reserve reconciliation, third-party API demo, and polishes the prototype to demo-ready state.
+This sprint plan delivers a fully functional Afrione prototype across three 2-week sprints. Sprint 1 establishes the foundation — project infrastructure, authentication, tiered KYC simulation, and the core event-sourced wallet. Sprint 2 delivers the full stablecoin operations layer (conversion, transfers, merchant collections). Sprint 3 completes the admin dashboard, reserve reconciliation, third-party API demo, and polishes the prototype to demo-ready state.
 
 All external integrations (Smile ID, Paystack, Celo, Fireblocks, ComplyAdvantage) are mocked with realistic simulated behaviour. Core architectural patterns (event-sourced ledger, JWT auth, idempotency keys, circuit breaker interfaces) are implemented correctly — making the prototype a genuine foundation for production development.
 
@@ -101,7 +101,7 @@ So that all subsequent stories have a consistent data foundation to build on.
 **User Story:**
 As an individual or business user,
 I want to register with my phone number and email, then log in securely with JWT and MFA,
-So that I can access the Check12 platform with my account protected.
+So that I can access the Afrione platform with my account protected.
 
 **Acceptance Criteria:**
 - [ ] Registration form collects: phone, email, password, account type (individual/business)
@@ -342,7 +342,7 @@ So that I can track my activity and reconcile my accounts.
 
 **User Story:**
 As a verified user,
-I want to send AFRi or xGHS to another Check12 user by phone number or username,
+I want to send AFRi or xGHS to another Afrione user by phone number or username,
 So that I can remit money across African borders quickly and cheaply.
 
 **Acceptance Criteria:**
@@ -378,7 +378,7 @@ So that my customers can pay me in xGHS or AFRi online or in-store.
 
 **Acceptance Criteria:**
 - [ ] Merchant creates payment link: amount, currency (AFRi or xGHS), description, expiry (1h / 24h / 7d)
-- [ ] System generates unique short URL (e.g. `pay.check12.com/p/abc123`) and QR code
+- [ ] System generates unique short URL (e.g. `pay.afrione.com/p/abc123`) and QR code
 - [ ] QR code downloadable as PNG
 - [ ] Payment link shareable via copy-to-clipboard
 - [ ] Payment page (no login required for guest): shows merchant name, amount, currency, description
@@ -404,7 +404,7 @@ So that my customers can pay me in xGHS or AFRi online or in-store.
 **Points:** 3
 
 **User Story:**
-As a customer without a Check12 account,
+As a customer without a Afrione account,
 I want to pay a merchant via a payment link using my mobile money,
 So that I can pay without needing to sign up for the platform.
 
@@ -465,7 +465,7 @@ So that I am always aware of activity on my account.
 **User Story:**
 As an admin or compliance officer,
 I want a dashboard to review KYC/KYB submissions, view platform metrics, and manage AML alerts,
-So that I can operate Check12 compliantly and monitor platform health.
+So that I can operate Afrione compliantly and monitor platform health.
 
 **Acceptance Criteria:**
 - [ ] Admin login (separate route `/admin/login`) with hardcoded admin credentials in dev
@@ -525,7 +525,7 @@ So that I can verify that circulating AFRi is fully backed by physical gold rese
 **User Story:**
 As a business developer,
 I want to generate an API key and register a webhook endpoint,
-So that I can integrate Check12 payment collections into my own application.
+So that I can integrate Afrione payment collections into my own application.
 
 **Acceptance Criteria:**
 - [ ] Business dashboard "API" tab: generate API key (shown once, then masked)

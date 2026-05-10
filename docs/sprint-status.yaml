@@ -1,9 +1,9 @@
 version: "6.0.0"
-project_name: "Check12"
+project_name: "Afrione"
 project_level: 2
 scope: "prototype"
 current_sprint: 3
-sprint_plan_path: "docs/sprint-plan-check12-2026-05-09.md"
+sprint_plan_path: "docs/sprint-plan-afrione-2026-05-09.md"
 
 team:
   size: 2

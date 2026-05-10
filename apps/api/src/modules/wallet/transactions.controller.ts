@@ -54,7 +54,7 @@ export class TransactionsController {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="check12-statement-${Date.now()}.csv"`,
+      `attachment; filename="afrione-statement-${Date.now()}.csv"`,
     );
     res.send(csv);
   }

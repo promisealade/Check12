@@ -1,4 +1,4 @@
-# Product Requirements Document: Check12
+# Product Requirements Document: Afrione
 
 **Date:** 2026-05-09
 **Author:** PromiseAlade
@@ -11,16 +11,16 @@
 
 ## Document Overview
 
-This Product Requirements Document (PRD) defines the functional and non-functional requirements for Check12. It serves as the source of truth for what will be built and provides traceability from requirements through implementation.
+This Product Requirements Document (PRD) defines the functional and non-functional requirements for Afrione. It serves as the source of truth for what will be built and provides traceability from requirements through implementation.
 
 **Related Documents:**
-- Product Brief: `docs/product-brief-check12-2026-05-09.md`
+- Product Brief: `docs/product-brief-afrione-2026-05-09.md`
 
 ---
 
 ## Executive Summary
 
-Check12 is a regulated Virtual Asset Service Provider (VASP) building a dual-stablecoin platform for cross-border payments, digital savings, and business collections across Africa. The platform issues two stablecoins: AFRi (USD-pegged, gold-backed) and xGHS (Ghana Cedi-pegged 1:1). By combining regulatory compliance with blockchain-native settlement, Check12 makes intra-Africa value transfer fast, affordable, and stable for individuals, SMEs, and merchants.
+Afrione is a regulated Virtual Asset Service Provider (VASP) building a dual-stablecoin platform for cross-border payments, digital savings, and business collections across Africa. The platform issues two stablecoins: AFRi (USD-pegged, gold-backed) and xGHS (Ghana Cedi-pegged 1:1). By combining regulatory compliance with blockchain-native settlement, Afrione makes intra-Africa value transfer fast, affordable, and stable for individuals, SMEs, and merchants.
 
 ---
 
@@ -146,7 +146,7 @@ Users convert between AFRi and xGHS within the platform. The system displays the
 **Priority:** Must Have
 
 **Description:**
-Verified users send AFRi or xGHS to other Check12 users or external wallet addresses across supported African markets. Transfers complete near-instantly with transparent fee disclosure upfront.
+Verified users send AFRi or xGHS to other Afrione users or external wallet addresses across supported African markets. Transfers complete near-instantly with transparent fee disclosure upfront.
 
 **Acceptance Criteria:**
 - [ ] User can search for a recipient by phone number, username, or wallet address
@@ -188,7 +188,7 @@ Verified merchants and SMEs create payment links and QR codes to accept AFRi and
 **Acceptance Criteria:**
 - [ ] Business can generate a payment link with a specified amount and currency (AFRi or xGHS)
 - [ ] Business can generate a QR code for physical point-of-sale use
-- [ ] Customer can complete payment via link or QR code without a Check12 account (guest pay via mobile money)
+- [ ] Customer can complete payment via link or QR code without a Afrione account (guest pay via mobile money)
 - [ ] Collected funds are credited to business wallet within 30 seconds of payment confirmation
 - [ ] Business receives a notification for each successful collection
 - [ ] Business can view all collections in transaction history with payer reference
@@ -256,7 +256,7 @@ Users receive real-time push notifications, SMS, and email alerts for key events
 **Priority:** Should Have
 
 **Description:**
-Businesses and developers access Check12 payment functionality via a REST API. API key management and webhook subscriptions allow third parties to embed collections into external applications.
+Businesses and developers access Afrione payment functionality via a REST API. API key management and webhook subscriptions allow third parties to embed collections into external applications.
 
 **Acceptance Criteria:**
 - [ ] Business admin can generate and revoke API keys from the dashboard
@@ -562,7 +562,7 @@ Directly addresses the two core user needs: cost reduction (low-fee on/off-ramp)
 ### EPIC-003: Transfers & Payments
 
 **Description:**
-Delivers the primary use cases for all three user segments: cross-border remittances for individuals, supplier payments for SMEs, and payment collections for merchants. This is the visible face of Check12.
+Delivers the primary use cases for all three user segments: cross-border remittances for individuals, supplier payments for SMEs, and payment collections for merchants. This is the visible face of Afrione.
 
 **Functional Requirements:**
 - FR-006 (Cross-border Transfer)
@@ -582,7 +582,7 @@ Transaction fees are the second revenue stream. Cross-border transfers and merch
 ### EPIC-004: Platform & Integrations
 
 **Description:**
-Enables Check12 to operate and scale as a business: internal admin tooling for compliance operations, and external API access for third-party ecosystem growth.
+Enables Afrione to operate and scale as a business: internal admin tooling for compliance operations, and external API access for third-party ecosystem growth.
 
 **Functional Requirements:**
 - FR-012 (Third-party API & Webhooks)
@@ -625,7 +625,7 @@ High-level stories per epic. Detailed stories with estimates will be created dur
 ### EPIC-004: Platform & Integrations
 
 - As an admin, I want to review and approve KYC/KYB submissions so that only verified users can access full platform functionality.
-- As a third-party developer, I want to integrate Check12 payments via REST API so that I can embed collections into my own application.
+- As a third-party developer, I want to integrate Afrione payments via REST API so that I can embed collections into my own application.
 - As an admin, I want to view daily reserve reconciliation reports so that I can verify AFRi gold backing remains fully collateralised.
 
 ---

@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-gradient-to-br from-brand-900 via-brand-700 to-gold-600 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Check12</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Afrione</h1>
           <p className="text-brand-100 text-lg">
             Dual-stablecoin platform for Africa
           </p>

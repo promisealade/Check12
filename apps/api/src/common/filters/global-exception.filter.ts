@@ -32,7 +32,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     response.status(status).json({
-      type: `https://check12.com/errors/${status}`,
+      type: `https://afrione.com/errors/${status}`,
       title: HttpStatus[status] ?? 'Error',
       status,
       detail: typeof message === 'string' ? message : (message as Record<string, unknown>)['message'],

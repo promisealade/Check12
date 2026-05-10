@@ -14,7 +14,7 @@ export const setAccessToken = (token: string) => { _accessToken = token; };
 export const clearAccessToken = () => { _accessToken = null; };
 
 // ─── Refresh token in sessionStorage (cleared on tab close) ──────────────────
-const RT_KEY = 'check12_rt';
+const RT_KEY = 'afrione_rt';
 
 export function setTokens(access: string, refresh: string) {
   _accessToken = access;

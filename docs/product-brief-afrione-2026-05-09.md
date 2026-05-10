@@ -1,4 +1,4 @@
-# Product Brief: Check12
+# Product Brief: Afrione
 
 **Date:** 2026-05-09
 **Author:** PromiseAlade
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Check12 is a regulated Virtual Asset Service Provider (VASP) building a dual-stablecoin platform for cross-border payments, digital savings, and business collections across Africa. The platform will issue two stablecoins: AFRi, pegged to the US dollar and backed by physical gold, and xGHS, pegged to the Ghana Cedi at 1:1. By combining regulatory compliance with blockchain-native settlement, Check12 makes intra-Africa value transfer fast, affordable, and stable.
+Afrione is a regulated Virtual Asset Service Provider (VASP) building a dual-stablecoin platform for cross-border payments, digital savings, and business collections across Africa. The platform will issue two stablecoins: AFRi, pegged to the US dollar and backed by physical gold, and xGHS, pegged to the Ghana Cedi at 1:1. By combining regulatory compliance with blockchain-native settlement, Afrione makes intra-Africa value transfer fast, affordable, and stable.
 
 ---
 
@@ -98,7 +98,7 @@ Gold-backed AFRi gives users a credible hedge against African currency devaluati
 
 ### Business Value
 
-Check12 generates revenue through two streams: a spread on currency conversions and per-transaction fees. This dual model captures value on both stablecoin adoption (conversions) and ongoing usage (transfers), aligning revenue with platform activity.
+Afrione generates revenue through two streams: a spread on currency conversions and per-transaction fees. This dual model captures value on both stablecoin adoption (conversions) and ongoing usage (transfers), aligning revenue with platform activity.
 
 ---
 
@@ -160,9 +160,9 @@ Check12 generates revenue through two streams: a spread on currency conversions 
 
 ## Success Criteria
 
-- Check12 is **fully licensed** as a VASP under applicable regulations
+- Afrione is **fully licensed** as a VASP under applicable regulations
 - The platform is **operationally profitable** within a defined post-launch window
-- Check12 is **trusted and actively used across 3 African markets**
+- Afrione is **trusted and actively used across 3 African markets**
 - AFRi and xGHS maintain their pegs reliably
 - No material regulatory sanctions or peg failures within the first operating year
 

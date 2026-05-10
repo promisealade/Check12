@@ -13,7 +13,7 @@ async function seed() {
   await qr.startTransaction();
 
   try {
-    console.info('🌱 Seeding Check12 database...');
+    console.info('🌱 Seeding Afrione database...');
 
     const pwHash = await bcrypt.hash(DEFAULT_PASSWORD, BCRYPT_ROUNDS);
     const adminHash = await bcrypt.hash(ADMIN_PASSWORD, BCRYPT_ROUNDS);

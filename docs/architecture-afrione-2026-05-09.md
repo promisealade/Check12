@@ -1,4 +1,4 @@
-# System Architecture: Check12
+# System Architecture: Afrione
 
 **Date:** 2026-05-09
 **Architect:** PromiseAlade
@@ -11,17 +11,17 @@
 
 ## Document Overview
 
-This document defines the system architecture for Check12, a regulated dual-stablecoin VASP platform. It provides the technical blueprint for implementation, addressing all 14 functional and 12 non-functional requirements from the PRD, incorporating 10 architectural recommendations for security, compliance, and resilience.
+This document defines the system architecture for Afrione, a regulated dual-stablecoin VASP platform. It provides the technical blueprint for implementation, addressing all 14 functional and 12 non-functional requirements from the PRD, incorporating 10 architectural recommendations for security, compliance, and resilience.
 
 **Related Documents:**
-- Product Requirements Document: `docs/prd-check12-2026-05-09.md`
-- Product Brief: `docs/product-brief-check12-2026-05-09.md`
+- Product Requirements Document: `docs/prd-afrione-2026-05-09.md`
+- Product Brief: `docs/product-brief-afrione-2026-05-09.md`
 
 ---
 
 ## Executive Summary
 
-Check12 is built on a **Modular Monolith with an Event-Driven Compliance Layer**, deployed on AWS af-south-1 (Cape Town) for low latency to African users. The internal double-entry ledger is the source of truth for all balances — Celo blockchain provides periodic batch settlement for on-chain proof, not per-transaction latency. An async SQS-driven compliance pipeline screens every transaction for AML and sanctions without blocking user flows. MPC wallets protect stablecoin reserves. Tiered KYC accelerates onboarding while meeting Bank of Ghana requirements. All financial endpoints enforce idempotency. Circuit breakers isolate every external integration (mobile money, banking, KYC, Celo RPC).
+Afrione is built on a **Modular Monolith with an Event-Driven Compliance Layer**, deployed on AWS af-south-1 (Cape Town) for low latency to African users. The internal double-entry ledger is the source of truth for all balances — Celo blockchain provides periodic batch settlement for on-chain proof, not per-transaction latency. An async SQS-driven compliance pipeline screens every transaction for AML and sanctions without blocking user flows. MPC wallets protect stablecoin reserves. Tiered KYC accelerates onboarding while meeting Bank of Ghana requirements. All financial endpoints enforce idempotency. Circuit breakers isolate every external integration (mobile money, banking, KYC, Celo RPC).
 
 ---
 
@@ -360,7 +360,7 @@ graph TB
 **Responsibilities:**
 - Payment link generation with specified amount, currency, expiry
 - QR code generation from payment link
-- Guest payment flow (non-Check12 users pay via mobile money)
+- Guest payment flow (non-Afrione users pay via mobile money)
 - Payment status polling and webhook delivery
 - Collection crediting to merchant wallet via Wallet module
 - Collection history and reconciliation export
@@ -996,7 +996,7 @@ All internal communication is via NestJS dependency injection (in-process functi
 ### Code Organization
 
 ```
-check12/
+afrione/
 ├── apps/
 │   ├── web/                    # Next.js frontend
 │   └── api/                    # NestJS backend

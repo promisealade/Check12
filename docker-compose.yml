@@ -3,24 +3,24 @@ version: '3.9'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: check12-postgres
+    container_name: afrione-postgres
     environment:
-      POSTGRES_DB: check12_dev
-      POSTGRES_USER: check12
-      POSTGRES_PASSWORD: check12password
+      POSTGRES_DB: afrione_dev
+      POSTGRES_USER: afrione
+      POSTGRES_PASSWORD: afrionepassword
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U check12 -d check12_dev']
+      test: ['CMD-SHELL', 'pg_isready -U afrione -d afrione_dev']
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: check12-redis
+    container_name: afrione-redis
     ports:
       - '6379:6379'
     volumes:
@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: check12-api
+    container_name: afrione-api
     ports:
       - '3001:3001'
     environment:
@@ -43,9 +43,9 @@ services:
       PORT: 3001
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: check12_dev
-      DB_USER: check12
-      DB_PASSWORD: check12password
+      DB_NAME: afrione_dev
+      DB_USER: afrione
+      DB_PASSWORD: afrionepassword
       REDIS_HOST: redis
       REDIS_PORT: 6379
     env_file:
@@ -72,7 +72,7 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    container_name: check12-web
+    container_name: afrione-web
     ports:
       - '3000:3000'
     environment:

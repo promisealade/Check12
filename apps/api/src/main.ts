@@ -31,7 +31,7 @@ async function bootstrap() {
   // Swagger (non-production only)
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('Check12 API')
+      .setTitle('Afrione API')
       .setDescription('Dual-stablecoin VASP platform API')
       .setVersion('1.0')
       .addBearerAuth()
