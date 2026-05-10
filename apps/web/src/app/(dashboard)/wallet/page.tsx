@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
@@ -54,6 +55,7 @@ const RATE_AFRI_TO_GHS = 14.82;
 
 export default function WalletPage() {
   const user = useAuthStore((s) => s.user);
+  const [balanceHidden, setBalanceHidden] = useState(false);
 
   const { data, isLoading } = useQuery<DashboardData>({
     queryKey: ['wallet-dashboard'],
@@ -117,13 +119,22 @@ export default function WalletPage() {
             </h1>
           </div>
         </div>
-        <div className="flex gap-2 lg:hidden">
-          <Link href="/notifications" className="icon-btn" aria-label="Notifications">
-            <Icon name="bell" className="w-[18px] h-[18px]" />
-          </Link>
-          <Link href="/wallet/fund" className="icon-btn" aria-label="Fund or scan">
-            <Icon name="qr" className="w-[18px] h-[18px]" />
-          </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setBalanceHidden((h) => !h)}
+            className="icon-btn"
+            aria-label={balanceHidden ? 'Show balances' : 'Hide balances'}
+          >
+            <Icon name={balanceHidden ? 'eyeOff' : 'eye'} className="w-[18px] h-[18px]" />
+          </button>
+          <div className="flex gap-2 lg:hidden">
+            <Link href="/notifications" className="icon-btn" aria-label="Notifications">
+              <Icon name="bell" className="w-[18px] h-[18px]" />
+            </Link>
+            <Link href="/wallet/fund" className="icon-btn" aria-label="Fund or scan">
+              <Icon name="qr" className="w-[18px] h-[18px]" />
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -131,7 +142,7 @@ export default function WalletPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Total balance"
-          value={`GHS ${totalGhs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={balanceHidden ? '••••••' : `GHS ${totalGhs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           sub="across both wallets"
           icon="wallet"
           tone="brand"
@@ -181,12 +192,12 @@ export default function WalletPage() {
           <div>
             <div className="flex items-baseline gap-2">
               <span className="font-display text-[40px] md:text-[56px] font-semibold tracking-tight tabular-nums leading-none">
-                {afriBalance.toFixed(2)}
+                {balanceHidden ? '••••••' : afriBalance.toFixed(2)}
               </span>
               <span className="text-xl md:text-2xl text-white/70">AFRi</span>
             </div>
             <div className="text-white/65 text-sm md:text-base mt-2 tabular-nums">
-              ≈ GHS {(afriBalance * RATE_AFRI_TO_GHS).toFixed(2)} · USD {afriBalance.toFixed(2)}
+              {balanceHidden ? '••••••' : `≈ GHS ${(afriBalance * RATE_AFRI_TO_GHS).toFixed(2)} · USD ${afriBalance.toFixed(2)}`}
             </div>
           </div>
         </div>
@@ -202,10 +213,10 @@ export default function WalletPage() {
           </div>
           <div>
             <div className="font-display font-semibold text-brand-700 text-3xl md:text-4xl tabular-nums leading-none mb-1">
-              {xghsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {balanceHidden ? '••••••' : xghsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div className="text-muted-500 text-sm tabular-nums">
-              GHS {xghsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {balanceHidden ? '••••••' : `GHS ${xghsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </div>
           </div>
         </div>
@@ -214,8 +225,8 @@ export default function WalletPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <QuickAction href="/transfer" label="Send" icon="arrowUpRight" tone="gold" />
-        <QuickAction href="/wallet/fund" label="Receive" icon="arrowDownLeft" tone="sage" />
-        <QuickAction href="/convert" label="Buy" icon="swap" tone="brand" />
+        <QuickAction href="/wallet/fund" label="Fund" icon="arrowDownLeft" tone="sage" />
+        <QuickAction href="/convert" label="Convert" icon="swap" tone="brand" />
         <QuickAction href="/collections" label="Cash out" icon="collect" tone="sand" />
       </div>
 
