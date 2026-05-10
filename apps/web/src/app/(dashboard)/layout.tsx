@@ -1,21 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../lib/stores/auth.store';
 import { apiClient } from '../../lib/api/client';
 import { useAuth } from '../../lib/hooks/useAuth';
+import { Icon, type IconName } from '../../lib/icons';
+import type { User } from '../../lib/stores/auth.store';
 
-const NAV_LINKS = [
-  { href: '/wallet', label: 'Wallet', icon: '💳' },
-  { href: '/transfer', label: 'Send', icon: '→' },
-  { href: '/convert', label: 'Convert', icon: '⇄' },
-  { href: '/collections', label: 'Collect', icon: '🧾' },
-  { href: '/savings', label: 'Save', icon: '🏦' },
-  { href: '/kyc', label: 'Verify', icon: '🪪' },
+type Nav = { href: string; label: string; icon: IconName };
+
+const NAV_LINKS: Nav[] = [
+  { href: '/wallet', label: 'Wallet', icon: 'wallet' },
+  { href: '/transfer', label: 'Send', icon: 'send' },
+  { href: '/convert', label: 'Convert', icon: 'swap' },
+  { href: '/collections', label: 'Collect', icon: 'collect' },
+  { href: '/savings', label: 'Save', icon: 'bank' },
+  { href: '/kyc', label: 'Verify', icon: 'id' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -24,10 +27,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, setUser, isAuthenticated } = useAuthStore();
   const { logout } = useAuth();
 
-  // Hydrate user profile on mount
   const { data: profile } = useQuery({
     queryKey: ['user-me'],
-    queryFn: async () => (await apiClient.get('/users/me')).data,
+    queryFn: async () => (await apiClient.get<User>('/users/me')).data,
     enabled: !user,
     retry: false,
   });
@@ -36,7 +38,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (profile) setUser(profile);
   }, [profile, setUser]);
 
-  // Redirect if not authenticated
   useEffect(() => {
     const timer = !isAuthenticated && !profile
       ? setTimeout(() => router.replace('/login'), 1500)
@@ -44,39 +45,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => { if (timer) clearTimeout(timer); };
   }, [isAuthenticated, profile, router]);
 
-  // Notifications unread count
   const { data: notifData } = useQuery<{ unreadCount: number }>({
     queryKey: ['notifications-count'],
-    queryFn: async () => (await apiClient.get('/notifications')).data,
+    queryFn: async () => (await apiClient.get<{ unreadCount: number }>('/notifications')).data,
     refetchInterval: 60_000,
     enabled: isAuthenticated || !!profile,
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top nav */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div className="min-h-screen bg-parchment pb-20 md:pb-0">
+      <header className="bg-parchment/85 backdrop-blur sticky top-0 z-10 border-b border-muted-100/70">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/wallet" className="flex items-center gap-2">
-            <Image src="/logo-square.png" alt="AfriOne" width={28} height={28} className="rounded-sm" />
-            <span className="font-bold text-brand-500 text-lg tracking-tight">AfriOne</span>
+            <BrandMark className="w-7 h-7 text-gold-500" />
+            <span className="font-display font-semibold text-brand-700 text-lg tracking-tight">Afrione</span>
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/notifications" className="relative text-gray-400 hover:text-gray-600">
-              🔔
+          <div className="flex items-center gap-2">
+            <Link
+              href="/notifications"
+              className="relative w-9 h-9 rounded-full hover:bg-white flex items-center justify-center text-muted-500 hover:text-brand-700 transition-colors"
+              aria-label="Notifications"
+            >
+              <Icon name="bell" className="w-[18px] h-[18px]" />
               {(notifData?.unreadCount ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-gold-500 text-white text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
                   {notifData!.unreadCount > 9 ? '9+' : notifData!.unreadCount}
                 </span>
               )}
             </Link>
             {user?.role === 'admin' && (
-              <Link href="/admin/metrics" className="text-sm text-gray-500 hover:text-gray-700">
+              <Link
+                href="/admin/metrics"
+                className="hidden sm:inline-flex text-xs font-semibold uppercase tracking-wider text-gold-700 bg-sand-100 px-2.5 py-1 rounded-full"
+              >
                 Admin
               </Link>
             )}
-            <button onClick={logout} className="text-sm text-gray-400 hover:text-gray-600">
-              Sign out
+            <button
+              onClick={logout}
+              className="w-9 h-9 rounded-full hover:bg-white flex items-center justify-center text-muted-500 hover:text-brand-700 transition-colors"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <Icon name="logout" className="w-[18px] h-[18px]" />
             </button>
           </div>
         </div>
@@ -93,39 +104,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-white text-brand-700 shadow-pop ring-1 ring-muted-100'
+                    : 'text-muted-600 hover:bg-white/60 hover:text-brand-700'
                 }`}
               >
-                <span className="text-base">{icon}</span>
+                <Icon name={icon} className="w-[18px] h-[18px]" />
                 {label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Main content */}
         <main className="flex-1 min-w-0">{children}</main>
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-muted-100 flex z-10">
         {NAV_LINKS.slice(0, 5).map(({ href, label, icon }) => {
-          const active = pathname === href;
+          const active = pathname === href || pathname.startsWith(href + '/');
           return (
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center py-2 text-xs gap-0.5 ${
-                active ? 'text-brand-600' : 'text-gray-400'
+              className={`flex-1 flex flex-col items-center py-2 text-[11px] gap-0.5 ${
+                active ? 'text-brand-700' : 'text-muted-400'
               }`}
             >
-              <span className="text-xl">{icon}</span>
+              <Icon name={icon} className="w-[20px] h-[20px]" />
               {label}
             </Link>
           );
         })}
       </nav>
     </div>
+  );
+}
+
+function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+      <g strokeLinecap="round" strokeLinejoin="round">
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+          <ellipse key={deg} cx="16" cy="9" rx="2.6" ry="6" transform={`rotate(${deg} 16 16)`} />
+        ))}
+        <circle cx="16" cy="16" r="2" fill="currentColor" stroke="none" />
+      </g>
+    </svg>
   );
 }

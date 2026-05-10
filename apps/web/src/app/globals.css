@@ -6,47 +6,143 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+
+    /* Afrione palette — sync'd with tailwind.config.ts */
+    --afri-parchment: #EFE9DD;
+    --afri-ink:       #1E2F22;
+    --afri-gold:      #C9A04B;
+    --afri-sage:      #CDD8C4;
+    --afri-sand:      #F4E8CB;
+    --afri-muted:     #6E6A5E;
   }
 
   body {
-    @apply bg-cream text-body antialiased;
+    @apply bg-parchment text-body antialiased;
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   * {
-    @apply border-gray-200;
+    @apply border-muted-100;
+  }
+
+  ::selection {
+    background-color: rgba(201, 160, 75, 0.35);
+    color: #1E2F22;
   }
 }
 
 @layer components {
+  /* ────────────────────────────────────────────────────────────────
+     Buttons
+     ──────────────────────────────────────────────────────────────── */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-pop hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-parchment disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-gold-500 px-4 py-3 text-sm font-semibold text-brand-900 shadow-pop hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2 focus:ring-offset-parchment disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-brand-700 shadow-pop ring-1 ring-inset ring-muted-100 hover:bg-muted-50 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-muted-600 hover:text-brand-700 hover:bg-muted-50 transition-colors;
+  }
+
+  /* Square action tile (Send / Receive / Buy / Cash out) */
+  .action-tile {
+    @apply flex flex-col items-center justify-center gap-2 rounded-2xl bg-white px-3 py-4 text-xs font-medium text-brand-700 ring-1 ring-muted-100 shadow-pop hover:bg-muted-50 active:scale-[0.98] transition;
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     Cards & surfaces
+     ──────────────────────────────────────────────────────────────── */
   .card {
-    @apply rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-100;
+    @apply rounded-3xl bg-white p-5 shadow-card ring-1 ring-muted-100;
   }
 
+  .card-flat {
+    @apply rounded-3xl bg-white p-5 ring-1 ring-muted-100;
+  }
+
+  /* The primary AFRi wallet hero — deep forest green with gold accents */
+  .wallet-card {
+    @apply relative rounded-4xl bg-brand-700 p-5 text-white shadow-wallet overflow-hidden;
+  }
+  .wallet-card .wallet-balance {
+    @apply font-display text-balance text-white;
+  }
+  .wallet-card .wallet-rate {
+    @apply inline-flex items-center gap-2 rounded-pill bg-brand-800/60 px-3 py-1.5 text-xs font-medium text-gold-300 ring-1 ring-gold-400/30;
+  }
+
+  /* Secondary wallet row (xGHS) */
+  .wallet-row {
+    @apply flex items-center gap-4 rounded-3xl bg-white p-4 ring-1 ring-muted-100 shadow-pop;
+  }
+
+  /* Avatar / token pill — circular badge used for wallet logos & tx icons */
+  .token-bubble {
+    @apply flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold;
+  }
+  .token-bubble--gold { @apply bg-gold-500 text-brand-900; }
+  .token-bubble--sage { @apply bg-sage-200 text-brand-700; }
+  .token-bubble--sand { @apply bg-sand-100 text-gold-700; }
+
+  /* ────────────────────────────────────────────────────────────────
+     Inputs
+     ──────────────────────────────────────────────────────────────── */
   .input {
-    @apply block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm placeholder-gray-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    @apply block w-full rounded-2xl border border-muted-100 bg-white px-4 py-3 text-sm text-brand-900 placeholder-muted-400 shadow-pop focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/40 transition-colors;
   }
-
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1.5;
+    @apply block text-sm font-medium text-muted-700 mb-1.5;
   }
 
-  .badge-success {
-    @apply inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20;
+  /* ────────────────────────────────────────────────────────────────
+     Badges & pills
+     ──────────────────────────────────────────────────────────────── */
+  .badge-success { @apply inline-flex items-center rounded-pill bg-success-50 px-2.5 py-1 text-xs font-medium text-success-700; }
+  .badge-warning { @apply inline-flex items-center rounded-pill bg-warn-50    px-2.5 py-1 text-xs font-medium text-warn-700; }
+  .badge-error   { @apply inline-flex items-center rounded-pill bg-danger-50  px-2.5 py-1 text-xs font-medium text-danger-700; }
+  .badge-neutral { @apply inline-flex items-center rounded-pill bg-muted-100  px-2.5 py-1 text-xs font-medium text-muted-600; }
+  .badge-sage    { @apply inline-flex items-center gap-1.5 rounded-pill bg-sage-200 px-3 py-1 text-xs font-medium text-brand-700; }
+  .badge-gold    { @apply inline-flex items-center gap-1.5 rounded-pill bg-sand-100 px-3 py-1 text-xs font-medium text-gold-700; }
+
+  /* ────────────────────────────────────────────────────────────────
+     Typography helpers
+     ──────────────────────────────────────────────────────────────── */
+  .h1 { @apply font-display text-2xl font-semibold text-brand-700 tracking-tight; }
+  .h2 { @apply text-[17px] font-medium text-brand-700; }
+  .h3 { @apply text-base font-medium text-brand-700; }
+  .subtle    { @apply text-sm text-muted-500; }
+  .greeting  { @apply text-sm text-muted-500; }      /* "Akwaaba" */
+  .name      { @apply text-lg font-semibold text-brand-700; }
+
+  /* ────────────────────────────────────────────────────────────────
+     Alerts
+     ──────────────────────────────────────────────────────────────── */
+  .alert-success { @apply rounded-2xl bg-success-50 border border-success-500/20 px-4 py-3 text-sm text-success-700; }
+  .alert-error   { @apply rounded-2xl bg-danger-50  border border-danger-500/20  px-4 py-3 text-sm text-danger-700; }
+  .alert-warning { @apply rounded-2xl bg-warn-50    border border-warn-500/20    px-4 py-3 text-sm text-warn-700; }
+  .alert-info    { @apply rounded-2xl bg-brand-50   border border-brand-100      px-4 py-3 text-sm text-brand-700; }
+
+  /* ────────────────────────────────────────────────────────────────
+     Misc
+     ──────────────────────────────────────────────────────────────── */
+  .icon-btn {
+    @apply w-10 h-10 rounded-full border border-muted-100 bg-white flex items-center justify-center text-brand-700 hover:bg-muted-50 transition-colors;
   }
 
-  .badge-warning {
-    @apply inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20;
+  /* Transaction row inside "Recent" list */
+  .tx-row {
+    @apply flex items-center gap-3 py-3;
   }
-
-  .badge-error {
-    @apply inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20;
+  .tx-row + .tx-row {
+    @apply border-t border-muted-100;
   }
+  .tx-amount-out { @apply text-sm font-semibold text-brand-700; }
+  .tx-amount-in  { @apply text-sm font-semibold text-success-700; }
 }

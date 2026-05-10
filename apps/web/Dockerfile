@@ -11,8 +11,8 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm --filter @check12/shared-types build
-RUN pnpm --filter @check12/web build
+RUN pnpm --filter @afrione/shared-types build
+RUN pnpm --filter @afrione/web build
 
 FROM base AS runner
 ENV NODE_ENV=production

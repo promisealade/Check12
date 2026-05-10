@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
+import { Icon } from '../../../lib/icons';
 
 interface SavingsAccount {
   id: string;
@@ -17,7 +18,7 @@ export default function SavingsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [label, setLabel] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
-  const [activeAccount, setActiveAccount] = useState<SavingsAccount | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [message, setMessage] = useState('');
@@ -25,7 +26,7 @@ export default function SavingsPage() {
 
   const { data: accounts = [] } = useQuery<SavingsAccount[]>({
     queryKey: ['savings'],
-    queryFn: async () => (await apiClient.get('/savings')).data,
+    queryFn: async () => (await apiClient.get<SavingsAccount[]>('/savings')).data,
   });
 
   const createAccount = useMutation({
@@ -42,12 +43,9 @@ export default function SavingsPage() {
   });
 
   const deposit = useMutation({
-    mutationFn: () =>
-      apiClient.post('/savings/deposit', {
-        savingsAccountId: activeAccount!.id,
-        amount: depositAmount,
-      }),
-    onSuccess: (res) => {
+    mutationFn: (acctId: string) =>
+      apiClient.post('/savings/deposit', { savingsAccountId: acctId, amount: depositAmount }),
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['savings'] });
       qc.invalidateQueries({ queryKey: ['wallet-dashboard'] });
       setMessage(`Deposited ${parseFloat(depositAmount).toFixed(2)} AFRi`);
@@ -58,11 +56,8 @@ export default function SavingsPage() {
   });
 
   const withdraw = useMutation({
-    mutationFn: () =>
-      apiClient.post('/savings/withdraw', {
-        savingsAccountId: activeAccount!.id,
-        amount: withdrawAmount,
-      }),
+    mutationFn: (acctId: string) =>
+      apiClient.post('/savings/withdraw', { savingsAccountId: acctId, amount: withdrawAmount }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['savings'] });
       qc.invalidateQueries({ queryKey: ['wallet-dashboard'] });
@@ -77,17 +72,17 @@ export default function SavingsPage() {
     <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Savings</h1>
-          <p className="text-gray-500 text-sm mt-1">Set goals and save in AFRi</p>
+          <h1 className="h1">Savings</h1>
+          <p className="subtle mt-1">Set goals and save in AFRi.</p>
         </div>
         <button className="btn-primary" onClick={() => setShowCreate(true)}>
-          + New goal
+          <Icon name="plus" className="w-4 h-4" /> New goal
         </button>
       </div>
 
       {showCreate && (
         <div className="card space-y-4">
-          <h2 className="font-semibold text-gray-800">New savings goal</h2>
+          <h2 className="font-semibold text-brand-700">New savings goal</h2>
           <div>
             <label className="label">Goal name</label>
             <input
@@ -109,9 +104,7 @@ export default function SavingsPage() {
               className="input"
             />
           </div>
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
-          )}
+          {error && <div className="alert-error">{error}</div>}
           <div className="flex gap-3">
             <button className="btn-secondary flex-1" onClick={() => setShowCreate(false)}>Cancel</button>
             <button
@@ -125,15 +118,14 @@ export default function SavingsPage() {
         </div>
       )}
 
-      {message && (
-        <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          {message}
-        </div>
-      )}
+      {message && <div className="alert-success">{message}</div>}
 
       {accounts.length === 0 ? (
-        <div className="card text-center py-10 text-gray-400 text-sm">
-          No savings goals yet. Create one to start saving.
+        <div className="card text-center py-12 space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <Icon name="bank" className="w-6 h-6" />
+          </div>
+          <p className="text-sm text-muted-500">No savings goals yet. Create one to start saving.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -141,51 +133,56 @@ export default function SavingsPage() {
             const balance = parseFloat(acct.balance);
             const target = acct.targetAmount ? parseFloat(acct.targetAmount) : null;
             const progress = target ? Math.min(100, (balance / target) * 100) : null;
-            const isActive = activeAccount?.id === acct.id;
+            const isActive = activeId === acct.id;
 
             return (
               <div key={acct.id} className="card space-y-4">
                 <div
-                  className="flex items-center justify-between cursor-pointer"
+                  className="flex items-start justify-between cursor-pointer gap-3"
                   onClick={() => {
-                    setActiveAccount(isActive ? null : acct);
+                    setActiveId(isActive ? null : acct.id);
                     setMessage('');
                     setError('');
                   }}
                 >
-                  <div>
-                    <p className="font-medium text-gray-800">{acct.label}</p>
-                    <p className="text-2xl font-bold text-brand-600 mt-1">
-                      {balance.toFixed(2)} <span className="text-sm font-normal text-gray-400">AFRi</span>
-                    </p>
-                    {target && (
-                      <p className="text-xs text-gray-400">
-                        Target: {target.toFixed(2)} AFRi
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-gold-100 text-gold-500 flex items-center justify-center shrink-0">
+                      <Icon name="star" className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-brand-700">{acct.label}</p>
+                      <p className="text-2xl font-semibold text-brand-600 mt-0.5 tabular-nums">
+                        {balance.toFixed(2)}
+                        <span className="text-sm font-normal text-muted-400 ml-1">AFRi</span>
                       </p>
-                    )}
+                      {target && (
+                        <p className="text-xs text-muted-400 tabular-nums">
+                          Target: {target.toFixed(2)} AFRi
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-gray-400 text-sm">{isActive ? '▲' : '▼'}</span>
+                  <Icon
+                    name={isActive ? 'arrowUp' : 'arrowDown'}
+                    className="w-4 h-4 text-muted-400 mt-3"
+                  />
                 </div>
 
                 {progress !== null && (
-                  <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div className="w-full bg-muted-100 rounded-full h-1.5">
                     <div
-                      className="bg-brand-500 h-2 rounded-full transition-all"
+                      className="bg-brand-500 h-1.5 rounded-full transition-all"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
                 )}
 
                 {isActive && (
-                  <div className="pt-2 border-t border-gray-100 space-y-3">
-                    {error && (
-                      <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
-                    )}
+                  <div className="pt-2 border-t border-muted-100 space-y-3">
+                    {error && <div className="alert-error">{error}</div>}
                     <div className="flex gap-2">
                       <input
-                        type="number"
-                        min="0.01"
-                        placeholder="Deposit amount"
+                        type="number" min="0.01" placeholder="Deposit amount"
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(e.target.value)}
                         className="input flex-1"
@@ -193,16 +190,14 @@ export default function SavingsPage() {
                       <button
                         className="btn-primary px-4"
                         disabled={!depositAmount || deposit.isPending}
-                        onClick={() => deposit.mutate()}
+                        onClick={() => deposit.mutate(acct.id)}
                       >
                         {deposit.isPending ? '…' : 'Deposit'}
                       </button>
                     </div>
                     <div className="flex gap-2">
                       <input
-                        type="number"
-                        min="0.01"
-                        placeholder="Withdraw amount"
+                        type="number" min="0.01" placeholder="Withdraw amount"
                         value={withdrawAmount}
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                         className="input flex-1"
@@ -210,7 +205,7 @@ export default function SavingsPage() {
                       <button
                         className="btn-secondary px-4"
                         disabled={!withdrawAmount || withdraw.isPending}
-                        onClick={() => withdraw.mutate()}
+                        onClick={() => withdraw.mutate(acct.id)}
                       >
                         {withdraw.isPending ? '…' : 'Withdraw'}
                       </button>

@@ -66,8 +66,8 @@ export default function ApiDemoPage() {
     setResponses((r) => ({ ...r, [key]: { loading: true } }));
     try {
       const res = ep.method === 'GET'
-        ? await apiClient.get(ep.path)
-        : await apiClient.post(ep.path, ep.body);
+        ? await apiClient.get<object>(ep.path)
+        : await apiClient.post<object>(ep.path, ep.body);
       setResponses((r) => ({ ...r, [key]: { data: res.data } }));
     } catch (err: any) {
       setResponses((r) => ({
@@ -84,15 +84,13 @@ export default function ApiDemoPage() {
         <p className="text-body/60 mt-2">
           Live interactive demo of the AfriOne stablecoin platform API
         </p>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-muted-400 mt-1">
           Sign in at{' '}
           <a href="/login" className="text-brand-600 hover:underline">
             /login
           </a>{' '}
-          first to access authenticated endpoints · Swagger UI at{' '}
-          <a href="http://localhost:3001/api/docs" target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
-            /api/docs
-          </a>
+          first to access authenticated endpoints. All requests are served by the
+          in-browser mock backend.
         </p>
       </div>
 
@@ -105,15 +103,15 @@ export default function ApiDemoPage() {
         ].map(({ icon, label, desc }) => (
           <div key={label} className="card text-center space-y-2">
             <div className="text-3xl">{icon}</div>
-            <p className="font-medium text-gray-800">{label}</p>
-            <p className="text-xs text-gray-500">{desc}</p>
+            <p className="font-medium text-brand-700">{label}</p>
+            <p className="text-xs text-muted-500">{desc}</p>
           </div>
         ))}
       </div>
 
       {/* Endpoint demos */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">Try the API</h2>
+        <h2 className="text-lg font-semibold text-brand-700">Try the API</h2>
         {ENDPOINTS.map((ep) => {
           const state = responses[ep.path];
           return (
@@ -123,21 +121,21 @@ export default function ApiDemoPage() {
                   className={`text-xs font-bold px-2 py-1 rounded shrink-0 ${
                     ep.method === 'GET'
                       ? 'bg-blue-100 text-blue-700'
-                      : 'bg-green-100 text-green-700'
+                      : 'bg-green-100 text-success-700'
                   }`}
                 >
                   {ep.method}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm text-gray-700">{ep.path}</span>
+                    <span className="font-mono text-sm text-muted-700">{ep.path}</span>
                     {ep.auth && (
-                      <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
+                      <span className="text-xs bg-amber-100 text-warn-700 px-1.5 py-0.5 rounded">
                         🔒 auth
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">{ep.description}</p>
+                  <p className="text-xs text-muted-400 mt-0.5">{ep.description}</p>
                 </div>
                 <button
                   onClick={() => runEndpoint(ep)}
@@ -149,19 +147,19 @@ export default function ApiDemoPage() {
               </div>
 
               {ep.body && (
-                <pre className="text-xs bg-gray-50 rounded-lg p-3 overflow-x-auto text-gray-600">
+                <pre className="text-xs bg-muted-50 rounded-lg p-3 overflow-x-auto text-muted-600">
                   {JSON.stringify(ep.body, null, 2)}
                 </pre>
               )}
 
               {state?.data && (
-                <pre className="text-xs bg-green-50 border border-green-100 rounded-lg p-3 overflow-x-auto text-green-800">
+                <pre className="text-xs bg-success-50 border border-green-100 rounded-lg p-3 overflow-x-auto text-green-800">
                   {JSON.stringify(state.data, null, 2)}
                 </pre>
               )}
 
               {state?.error && (
-                <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+                <div className="rounded-md bg-danger-50 border border-red-200 px-3 py-2 text-xs text-danger-700">
                   {state.error}
                 </div>
               )}
@@ -170,8 +168,8 @@ export default function ApiDemoPage() {
         })}
       </div>
 
-      <div className="text-center text-xs text-gray-400 py-4">
-        AfriOne Prototype v0.1 · Built with NestJS + Next.js + PostgreSQL + Redis
+      <div className="text-center text-xs text-muted-400 py-4">
+        Afrione Prototype v0.1 · Next.js + in-browser mock backend (localStorage-backed)
       </div>
     </div>
   );

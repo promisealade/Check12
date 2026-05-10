@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api/client';
+import { Icon, type IconName } from '../../../../lib/icons';
 
 interface Metrics {
   totalUsers: number;
@@ -15,78 +16,63 @@ interface Metrics {
 export default function AdminMetricsPage() {
   const { data, isLoading } = useQuery<Metrics>({
     queryKey: ['admin-metrics'],
-    queryFn: async () => (await apiClient.get('/admin/metrics')).data,
+    queryFn: async () => (await apiClient.get<Metrics>('/admin/metrics')).data,
     refetchInterval: 60_000,
   });
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        <div className="animate-pulse grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 bg-gray-100 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500 text-sm">Platform overview</p>
-        </div>
-        <div className="flex gap-3 text-sm">
-          <Link href="/admin/kyc" className="btn-secondary">KYC Queue</Link>
-          <Link href="/admin/aml" className="btn-secondary">AML Alerts</Link>
-          <Link href="/admin/reserves" className="btn-secondary">Reserves</Link>
-        </div>
+    <div className="max-w-5xl mx-auto py-8 px-4 space-y-8">
+      <div>
+        <h1 className="h1">Admin dashboard</h1>
+        <p className="subtle mt-1">Platform overview · live mock metrics</p>
       </div>
 
-      {/* Metric cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard label="Total users" value={data?.totalUsers ?? 0} icon="👤" />
-        <MetricCard label="Pending KYC" value={data?.pendingKyc ?? 0} icon="🪪" alert={(data?.pendingKyc ?? 0) > 0} />
-        <MetricCard label="AML alerts" value={data?.pendingAml ?? 0} icon="⚠️" alert={(data?.pendingAml ?? 0) > 0} />
-        <MetricCard label="Transactions" value={data?.totalTransactions ?? 0} icon="💸" />
+        <MetricCard label="Total users" value={data?.totalUsers ?? 0} icon="user" loading={isLoading} />
+        <MetricCard label="Pending KYC" value={data?.pendingKyc ?? 0} icon="id" alert={(data?.pendingKyc ?? 0) > 0} loading={isLoading} />
+        <MetricCard label="AML alerts" value={data?.pendingAml ?? 0} icon="alert" alert={(data?.pendingAml ?? 0) > 0} loading={isLoading} />
+        <MetricCard label="Transactions" value={data?.totalTransactions ?? 0} icon="trending" loading={isLoading} />
       </div>
 
-      {/* Volume */}
       {data?.volume && data.volume.length > 0 && (
-        <div className="card space-y-3">
-          <h2 className="font-semibold text-gray-800">Transaction volume</h2>
-          {data.volume.map((v) => (
-            <div key={v.currency} className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">{v.currency}</span>
-              <span className="font-bold text-gray-900">
-                {parseFloat(v.volume).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            </div>
-          ))}
+        <div className="card space-y-4">
+          <h2 className="h2">Transaction volume</h2>
+          <div className="space-y-2">
+            {data.volume.map((v) => (
+              <div key={v.currency} className="flex justify-between items-center text-sm">
+                <span className="text-muted-600 font-medium">{v.currency}</span>
+                <span className="font-semibold text-brand-700 tabular-nums">
+                  {parseFloat(v.volume).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Quick links */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
         {[
-          { href: '/admin/kyc', label: 'Review KYC queue', icon: '🪪', count: data?.pendingKyc },
-          { href: '/admin/aml', label: 'AML alert review', icon: '⚠️', count: data?.pendingAml },
-          { href: '/admin/reserves', label: 'Reserve report', icon: '🏦', count: null },
+          { href: '/admin/kyc', label: 'KYC queue', icon: 'id' as IconName, count: data?.pendingKyc },
+          { href: '/admin/aml', label: 'AML alerts', icon: 'alert' as IconName, count: data?.pendingAml },
+          { href: '/admin/reserves', label: 'Reserves', icon: 'shieldCheck' as IconName, count: null as number | null },
         ].map(({ href, label, icon, count }) => (
           <Link
             key={href}
             href={href}
-            className="card hover:border-brand-200 transition-colors text-center space-y-2"
+            className="card hover:border-brand-200 hover:shadow-md transition-all"
           >
-            <div className="text-3xl">{icon}</div>
-            <p className="text-sm font-medium text-gray-700">{label}</p>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center">
+                <Icon name={icon} className="w-5 h-5" />
+              </span>
+              <p className="font-medium text-brand-700">{label}</p>
+            </div>
             {count !== null && count !== undefined && count > 0 && (
-              <span className="inline-block bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                {count} pending
+              <span className="badge-warning">
+                {count} pending review
               </span>
             )}
+            {count === 0 && <span className="badge-success">All clear</span>}
           </Link>
         ))}
       </div>
@@ -95,21 +81,26 @@ export default function AdminMetricsPage() {
 }
 
 function MetricCard({
-  label,
-  value,
-  icon,
-  alert,
+  label, value, icon, alert, loading,
 }: {
-  label: string;
-  value: number;
-  icon: string;
-  alert?: boolean;
+  label: string; value: number; icon: IconName; alert?: boolean; loading?: boolean;
 }) {
+  if (loading) {
+    return <div className="h-28 bg-white/70 border border-muted-100 rounded-3xl animate-pulse" />;
+  }
   return (
-    <div className={`card text-center space-y-2 ${alert ? 'border-amber-200 bg-amber-50' : ''}`}>
-      <div className="text-3xl">{icon}</div>
-      <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
-      <p className="text-xs text-gray-500">{label}</p>
+    <div className={`card flex flex-col gap-3 ${alert ? 'border-gold-200 bg-gold-50/40' : ''}`}>
+      <div className="flex items-center justify-between">
+        <span className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+          alert ? 'bg-gold-100 text-gold-500' : 'bg-brand-50 text-brand-700'
+        }`}>
+          <Icon name={icon} className="w-5 h-5" />
+        </span>
+      </div>
+      <div>
+        <p className="text-3xl font-semibold text-brand-700 tabular-nums">{value.toLocaleString()}</p>
+        <p className="text-xs text-muted-500 mt-0.5">{label}</p>
+      </div>
     </div>
   );
 }
