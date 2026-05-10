@@ -4,11 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Afrione — regulated dual-stablecoin VASP platform for cross-border payments, savings, and business collections (AFRi USD-pegged + xGHS Cedi-pegged). Turborepo + pnpm workspace with two apps and one shared package.
+Afrione — frontend prototype of a regulated dual-stablecoin VASP for Africa (AFRi USD-pegged + xGHS Cedi-pegged). Originally a NestJS+Next.js app; the backend has been removed and the web UI now runs against an in-browser mock backend so the full feature set can be demoed without infrastructure.
 
-- `apps/api` — NestJS 10 backend (port 3001), TypeORM + PostgreSQL, Redis, JWT auth
 - `apps/web` — Next.js 14 App Router frontend (port 3000), TanStack Query, Zustand, React Hook Form + Zod
-- `packages/shared-types` — TypeScript DTOs consumed by both apps via `@afrione/shared-types` (workspace dep)
+- `bmad/`, `docs/` — BMAD planning workflow + product/architecture docs from the original design phase
 
 `pnpm` is required (`pnpm@9.0.0`, Node ≥20). Tasks are orchestrated by Turborepo — run from the repo root.
 
@@ -17,73 +16,62 @@ Afrione — regulated dual-stablecoin VASP platform for cross-border payments, s
 Root scripts (turbo fan-out):
 
 ```bash
-pnpm dev              # both apps in watch mode
-pnpm build            # build all (depends on ^build, so shared-types builds first)
-pnpm test             # all jest suites
-pnpm test:coverage
-pnpm lint             # eslint --fix per package
-pnpm type-check       # tsc --noEmit per package
-pnpm format           # prettier write across repo
-pnpm db:migrate       # runs only against `api`
-pnpm db:seed
-pnpm db:reset         # drop schema → migrate → seed
+pnpm dev              # Next.js dev server on :3000
+pnpm build            # next build
+pnpm test             # jest
+pnpm lint             # next lint
+pnpm type-check       # tsc --noEmit
+pnpm format           # prettier write
 ```
 
-Single test (api): from `apps/api`, `pnpm jest path/to/file.spec.ts` or `-t "test name"`. Web uses the same pattern from `apps/web`. Jest configs are inline in each app's `package.json` — api enforces 80% line/function and 70% branch coverage.
+Single test (web): from `apps/web`, `pnpm jest path/to/file.spec.ts` or `-t "test name"`. Jest config is inline in `apps/web/package.json`.
 
-DB migrations live in `apps/api/src/database/migrations/`. Generate a new one with `pnpm --filter api db:migrate:generate src/database/migrations/Name`. The DataSource (`apps/api/src/database/data-source.ts`) accepts either `DATABASE_URL` (Railway/Neon/Supabase) or discrete `DB_*` vars; `synchronize: false` always — schema changes go through migrations.
+No infrastructure to start — no Postgres, no Redis, no Docker. Just `pnpm dev`.
 
-## Local infrastructure
+## Mock backend
 
-```bash
-docker compose up postgres redis -d   # required before db:migrate / dev
-```
+All API calls funnel through `apps/web/src/lib/api/client.ts`, which exposes the same `apiClient.{get,post,patch,delete}` shape the original axios instance had. Every request is dispatched to handlers in `apps/web/src/lib/api/mock.ts`, which owns:
 
-`docker-compose.yml` also defines `api` and `web` services with `develop.watch` sync if you want fully containerized dev. Env files are not committed — copy `apps/api/.env.example` → `apps/api/.env` and `apps/web/.env.example` → `apps/web/.env.local` before first run.
+- A typed in-memory store (`Db`) covering users, wallets, an event-sourced ledger, transactions, savings, notifications, payment links, KYC docs, AML alerts, and reserve snapshots.
+- Persistence to `localStorage` under the key `afrione_mock_db_v1` — reloading the tab keeps your wallet state. To wipe, call `resetMockDb()` from the module or clear that localStorage key.
+- Stub JWTs (base64-encoded `{userId, exp}`) returned by `/auth/login`. The access token lives in memory; refresh token in `sessionStorage` (so a hard refresh in the same tab silently re-authenticates via `/auth/refresh`, exactly like the original flow).
+- ~38 routes covering auth, wallet/dashboard, transactions, funding (mock MoMo: phone ending in `000` declines), stablecoin rate/preview/convert, transfers (≥1000 AFRi or ≥16500 xGHS auto-flags AML), KYC/KYB submission (auto-approve), savings, notifications, payment-link collections, and admin (metrics/KYC queue/AML alerts/reserves).
 
-## Architecture
+Page components are unaware of the swap — they still call `apiClient.get('/wallets/dashboard')` etc. When adding a new endpoint:
 
-Backend is a **modular monolith**. `AppModule` (`apps/api/src/app.module.ts`) wires feature modules under `src/modules/`: `identity` (auth + users), `kyc`, `wallet`, `stablecoin`, `transfers`, `collections`, `funding`, `savings`, `notifications`, `admin`, `aml`, `redis`. Each module owns its controllers, services, and DTOs.
+1. Add the route in the dispatch table in `mock.ts` (`handleRequest`).
+2. Add a handler that mutates `db()` and calls `persist()` after writes.
+3. Throw `MockHttpError(status, message)` for failures — pages read `err.response?.data?.detail`.
 
-Cross-cutting concerns are registered globally in `AppModule`:
+The wallet **double-entry ledger** is preserved as the source of truth: balances are computed from `db().ledger` (`balanceOf(walletId)`), not stored on the wallet. Mutating money? Append a `LedgerEvent` plus a `Transaction` row, then `persist()`.
 
-- `GlobalExceptionFilter` (APP_FILTER) — uniform error envelope
-- `LoggingInterceptor` (APP_INTERCEPTOR)
-- `IdempotencyInterceptor` (APP_INTERCEPTOR) — POSTs with an `Idempotency-Key` header are cached in Redis for 24h; replays return the cached body with `X-Idempotency-Replayed: true`. Any new POST endpoint that mutates money MUST be safe to receive an idempotency key.
+## Demo accounts (seeded on first load)
 
-`main.ts` sets a global `/api` prefix and URI-based versioning (`/api/v1/...`), enables a strict ValidationPipe (`whitelist`, `forbidNonWhitelisted`, `transform`), and mounts Swagger at `/api/docs` outside production.
+| Email | Password | Notes |
+|-------|----------|-------|
+| `amara@example.com` | `Password123!` | Tier 2 individual, wallets pre-funded |
+| `kofi@example.com` | `Password123!` | Tier 1 individual |
+| `yaa@example.com` | `Password123!` | Tier 0, phone unverified |
+| `akosua@sme.com` | `Password123!` | Approved business — see `/collections` |
+| `kwaben@sme.com` | `Password123!` | Pending business |
+| `admin@afrione.com` | `Admin@afrione!` | Admin — `/admin/metrics`, `/admin/kyc`, `/admin/aml`, `/admin/reserves` |
 
-### Money model (important)
+After login the dashboard layout fetches `/users/me` to hydrate the Zustand auth store. Hard refresh works in the same tab (refresh token in sessionStorage); closing the tab logs you out.
 
-The internal **double-entry ledger is the source of truth** for balances. Wallets aggregate `LedgerEvent` rows (debit/credit) — never mutate a balance column directly. `WalletService.appendLedgerEvent` is the canonical write path; transfers, funding, savings, etc. compose multiple ledger events inside a single flow (see `apps/api/src/modules/transfers/transfers.service.ts` for the pattern: debit sender total, credit recipient amount, record fee event). Amounts are stored as 8-decimal fixed-point strings (e.g. `'0.01000000'`) — convert with `parseFloat` only at the boundary and re-format with `.toFixed(8)`.
+## Frontend layout
 
-Currency codes are the literal strings `'AFRi'` and `'xGHS'`.
-
-### Auth, KYC tiering, idempotency
-
-- JWT (access + refresh) issued by `IdentityModule`. Access token in memory on the web client; refresh in `sessionStorage` (cleared on tab close) — `apps/web/src/lib/api/client.ts` is the only place that touches tokens and handles 401 → refresh → replay.
-- `KycGuard` + `@KycTier(n)` decorator (`apps/api/src/common/`) gate endpoints by user tier. Apply to any controller method that requires verified identity; the guard reads `request.user.tier` populated by JWT strategy.
-- For mutating POST endpoints, accept an `Idempotency-Key` header; the global interceptor handles caching.
-
-### Frontend layout
-
-`apps/web/src/app` uses Next.js route groups: `(auth)`, `(dashboard)`, `(admin)`. Each group has its own `layout.tsx`. API calls go through the shared `apiClient` axios instance — do not instantiate axios elsewhere or token refresh will be skipped. State: TanStack Query for server data, Zustand stores in `src/lib/stores/` for client-only state (e.g. `auth.store.ts`).
+`apps/web/src/app` uses Next.js route groups: `(auth)`, `(dashboard)`, `(admin)`, plus a public `pay/[shortCode]` page for payment-link recipients. Server data via TanStack Query, client-only state via Zustand stores in `src/lib/stores/`.
 
 ## Conventions
 
-- Shared DTOs/types belong in `packages/shared-types/src/<domain>.ts` and re-exported from `index.ts`. If a type is used on both sides, add it there rather than duplicating.
-- ESLint root config (`.eslintrc.js`) bans `console.log` (allows `warn`/`error`/`info`) and unused vars unless prefixed `_`. Husky `pre-commit` runs `lint-staged` (eslint --fix + prettier) — fix lint errors before committing rather than skipping the hook.
-- TypeScript strict mode is on across the repo via `tsconfig.base.json` (includes `noUnusedLocals`, `noImplicitReturns`).
+- ESLint root config (`.eslintrc.js`) bans `console.log` (allows `warn`/`error`/`info`) and unused vars unless prefixed `_`. Husky `pre-commit` runs `lint-staged` (eslint --fix + prettier).
+- TypeScript strict mode is on across the repo via `tsconfig.base.json` (`noUnusedLocals`, `noImplicitReturns`).
 
 ## Planning docs
 
-Authoritative product/architecture context lives in `docs/`:
+Background context (from the original full-stack design phase) lives in `docs/`:
 
-- `docs/architecture-afrione-2026-05-09.md` — full system design (read this before non-trivial backend changes)
+- `docs/architecture-afrione-2026-05-09.md` — full system design (production architecture as originally planned)
 - `docs/prd-afrione-2026-05-09.md`, `product-brief-...md`, `sprint-plan-...md`, `erd.md`
 
-The `bmad/` directory and BMAD-prefixed skills are for the BMAD planning workflow that produced these docs; `docs/bmm-workflow-status.yaml` and `docs/sprint-status.yaml` track its state.
-
-## Seed accounts (after `pnpm db:seed`)
-
-`amara@example.com` (Tier 2), `kofi@example.com` (Tier 1), `akosua@sme.com` (approved business), `admin@afrione.com` — all `Password123!` except admin (`Admin@afrione!`). Mock integrations: Smile ID auto-approves unless ID ends in `FAIL`; mobile money succeeds unless phone ends in `000`; AFRi↔xGHS rate is 16.5 ± 0.2% drift.
+These describe what a real backend would look like; they are not what's running today. The prototype mock approximates that behavior just well enough to drive the UI.

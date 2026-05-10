@@ -1,13 +1,13 @@
-import axios from 'axios';
+'use client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+// Mock API client — same surface as the original axios-based one.
+// All requests are dispatched to the in-memory backend in `./mock`.
 
-export const apiClient = axios.create({
-  baseURL: `${API_BASE}/api/v1`,
-  headers: { 'Content-Type': 'application/json' },
-});
+import { decodeToken, handleRequest } from './mock';
 
-// ─── In-memory access token (XSS-safe, lost on page refresh by design) ───────
+type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
+
+// ─── In-memory access token (cleared on hard refresh by design) ─────────────
 let _accessToken: string | null = null;
 export const getAccessToken = () => _accessToken;
 export const setAccessToken = (token: string) => { _accessToken = token; };
@@ -31,42 +31,64 @@ export function getRefreshToken(): string | null {
   return sessionStorage.getItem(RT_KEY);
 }
 
-// ─── Request interceptor: attach Bearer token ────────────────────────────────
-apiClient.interceptors.request.use((config) => {
-  if (_accessToken) config.headers.Authorization = `Bearer ${_accessToken}`;
-  return config;
-});
+function authUserId(): string | null {
+  return decodeToken(_accessToken)?.userId ?? null;
+}
 
-// ─── Response interceptor: refresh on 401 ────────────────────────────────────
-apiClient.interceptors.response.use(
-  (res) => res,
-  async (error: unknown) => {
-    const axiosError = error as {
-      response?: { status: number };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      config: any;
-    };
+async function attempt(method: Method, path: string, body?: unknown) {
+  return handleRequest(
+    method,
+    path,
+    body as Record<string, unknown> | undefined,
+    authUserId(),
+  );
+}
 
-    if (axiosError.response?.status === 401 && !axiosError.config._retry) {
-      axiosError.config._retry = true;
-      const rt = getRefreshToken();
-      if (rt) {
-        try {
-          const res = await axios.post<{ accessToken: string; refreshToken: string }>(
-            `${API_BASE}/api/v1/auth/refresh`,
-            { refreshToken: rt },
-          );
-          setTokens(res.data.accessToken, res.data.refreshToken);
-          return apiClient(axiosError.config);
-        } catch {
-          clearTokens();
-          if (typeof window !== 'undefined') window.location.href = '/login';
-        }
-      } else {
-        if (typeof window !== 'undefined') window.location.href = '/login';
+async function request(method: Method, path: string, body?: unknown) {
+  try {
+    return await attempt(method, path, body);
+  } catch (err) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status !== 401) throw err;
+
+    const rt = getRefreshToken();
+    if (!rt) throw err;
+    try {
+      const refreshed = (await handleRequest(
+        'POST',
+        '/auth/refresh',
+        { refreshToken: rt },
+        null,
+      )) as { data: { accessToken: string; refreshToken: string } };
+      setTokens(refreshed.data.accessToken, refreshed.data.refreshToken);
+      return await attempt(method, path, body);
+    } catch {
+      clearTokens();
+      if (
+        typeof window !== 'undefined' &&
+        !window.location.pathname.startsWith('/login')
+      ) {
+        window.location.href = '/login';
       }
+      throw err;
     }
+  }
+}
 
-    return Promise.reject(error);
+export const apiClient = {
+  get: <T = unknown>(path: string) =>
+    request('GET', path) as Promise<{ data: T }>,
+  post: <T = unknown>(path: string, body?: unknown) =>
+    request('POST', path, body) as Promise<{ data: T }>,
+  patch: <T = unknown>(path: string, body?: unknown) =>
+    request('PATCH', path, body) as Promise<{ data: T }>,
+  put: <T = unknown>(path: string, body?: unknown) =>
+    request('PUT', path, body) as Promise<{ data: T }>,
+  delete: <T = unknown>(path: string) =>
+    request('DELETE', path) as Promise<{ data: T }>,
+  // No-op shim — original axios instance exposed `.interceptors`.
+  interceptors: {
+    request: { use: () => undefined },
+    response: { use: () => undefined },
   },
-);
+};

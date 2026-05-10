@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Afrione — theme preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --parchment: #EFE9DD;
+    --ink:       #1E2F22;
+    --ink-600:   #243A28;
+    --gold-300:  #E6C57A;
+    --gold-400:  #C9A04B;
+    --gold-500:  #B9893A;
+    --gold-700:  #7C5920;
+    --sage-100:  #E1E8DB;
+    --sage-200:  #CDD8C4;
+    --sand-100:  #F4E8CB;
+    --muted-100: #ECE7DA;
+    --muted-400: #8A8576;
+    --muted-500: #6E6A5E;
+    --muted-700: #3F3D37;
+    --success-50: #E9F2EA;
+    --success-700: #1F5326;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--parchment);
+    color: var(--muted-700);
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 { font-size: 22px; color: var(--ink); margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; color: var(--muted-500); text-transform: uppercase; letter-spacing: 0.08em; margin: 32px 0 12px; }
+  .lead { color: var(--muted-500); margin: 0 0 24px; font-size: 14px; }
+
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  .swatch {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(31,47,34,.04), 0 6px 18px rgba(31,47,34,.05);
+    ring: 1px solid var(--muted-100);
+  }
+  .swatch .chip { height: 72px; }
+  .swatch .meta { padding: 10px 12px; font-size: 12px; color: var(--muted-700); }
+  .swatch .meta strong { display: block; color: var(--ink); font-weight: 600; }
+  .swatch .meta code { color: var(--muted-500); font-size: 11px; }
+
+  /* Mock wallet card */
+  .wallet {
+    max-width: 360px;
+    margin: 0 0 16px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0 8px 28px rgba(15,26,18,.20);
+  }
+  .wallet .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .wallet .bubble { width: 38px; height: 38px; border-radius: 999px; background: var(--gold-400); color: var(--ink); display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .wallet .title { font-weight: 600; font-size: 15px; }
+  .wallet .subtitle { font-size: 12px; color: rgba(255,255,255,.65); }
+  .wallet .rate {
+    background: rgba(20,30,22,.55);
+    color: var(--gold-300);
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(201,160,75,.30);
+    white-space: nowrap;
+  }
+  .wallet .balance { font-size: 38px; font-weight: 600; letter-spacing: -.02em; margin-top: 14px; line-height: 1.05; }
+  .wallet .balance small { font-size: 18px; font-weight: 500; opacity: .85; margin-left: 6px; }
+  .wallet .fx { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 4px; }
+
+  /* xGHS row */
+  .xrow { display:flex; align-items:center; gap:14px; background:#fff; border-radius:22px; padding:14px 16px; box-shadow:0 1px 2px rgba(31,47,34,.04); max-width: 360px; }
+  .xrow .b { width:36px; height:36px; border-radius:999px; background: var(--sage-200); color: var(--ink); display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .xrow .t1 { color: var(--ink); font-weight:600; font-size:14px; }
+  .xrow .t2 { color: var(--muted-500); font-size:12px; margin-top:2px; }
+  .xrow .amt { margin-left:auto; text-align:right; }
+  .xrow .amt b { color: var(--ink); display:block; font-size:16px; }
+  .xrow .amt span { color: var(--muted-500); font-size:12px; }
+
+  /* Action tiles */
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-width:360px; margin:16px 0; }
+  .tile { background:#fff; border-radius:18px; padding:14px 8px; text-align:center; box-shadow:0 1px 2px rgba(31,47,34,.04); }
+  .tile .sq { width:18px; height:18px; border:1.5px solid var(--ink); border-radius:4px; margin:0 auto 8px; }
+  .tile div + div { color: var(--ink); font-size:13px; font-weight:500; }
+
+  /* Badges */
+  .badges { display:flex; gap:10px; flex-wrap:wrap; }
+  .badge { font-size:12px; padding:6px 12px; border-radius:999px; font-weight:500; display:inline-flex; gap:6px; align-items:center; }
+  .badge--sage { background: var(--sage-200); color: var(--ink); }
+  .badge--gold { background: var(--sand-100); color: var(--gold-700); }
+  .badge--success { background: var(--success-50); color: var(--success-700); }
+</style>
+</head>
+<body>
+
+<h1>Afrione — theme preview</h1>
+<p class="lead">Tokens lifted from the wallet home screen. Use this page to eyeball the live palette next to the mockup.</p>
+
+<!-- mock components -->
+<div class="wallet">
+  <div class="row">
+    <div style="display:flex; gap:12px;">
+      <div class="bubble">A</div>
+      <div>
+        <div class="title">AFRi wallet</div>
+        <div class="subtitle">Gold-backed · USD-pegged</div>
+      </div>
+    </div>
+    <div class="rate">Live · 1 AFRi = 14.82 GHS</div>
+  </div>
+  <div class="balance">42.18<small>AFRi</small></div>
+  <div class="fx">≈ GHS 625.31 · USD 42.18</div>
+</div>
+
+<div class="xrow">
+  <div class="b">x</div>
+  <div>
+    <div class="t1">xGHS wallet</div>
+    <div class="t2">1:1 cedi · Bank-backed</div>
+  </div>
+  <div class="amt"><b>1,240.00</b><span>GHS 1,240.00</span></div>
+</div>
+
+<div class="tiles">
+  <div class="tile"><div class="sq"></div><div>Send</div></div>
+  <div class="tile"><div class="sq"></div><div>Receive</div></div>
+  <div class="tile"><div class="sq"></div><div>Buy</div></div>
+  <div class="tile"><div class="sq"></div><div>Cash out</div></div>
+</div>
+
+<div class="badges">
+  <span class="badge badge--sage">Bank of Ghana licensed</span>
+  <span class="badge badge--gold">100% reserves</span>
+  <span class="badge badge--success">Settled in 38s</span>
+</div>
+
+<h2>Surfaces & accents</h2>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#EFE9DD"></div><div class="meta"><strong>parchment</strong><code>#EFE9DD</code> page bg</div></div>
+  <div class="swatch"><div class="chip" style="background:#1E2F22"></div><div class="meta"><strong>brand-700 / ink</strong><code>#1E2F22</code> wallet card</div></div>
+  <div class="swatch"><div class="chip" style="background:#243A28"></div><div class="meta"><strong>brand-600</strong><code>#243A28</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#C9A04B"></div><div class="meta"><strong>gold-400</strong><code>#C9A04B</code> primary accent</div></div>
+  <div class="swatch"><div class="chip" style="background:#B9893A"></div><div class="meta"><strong>gold-500</strong><code>#B9893A</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#E6C57A"></div><div class="meta"><strong>gold-300</strong><code>#E6C57A</code> rate text</div></div>
+  <div class="swatch"><div class="chip" style="background:#CDD8C4"></div><div class="meta"><strong>sage-200</strong><code>#CDD8C4</code> xGHS pill</div></div>
+  <div class="swatch"><div class="chip" style="background:#E1E8DB"></div><div class="meta"><strong>sage-100</strong><code>#E1E8DB</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#F4E8CB"></div><div class="meta"><strong>sand-100</strong><code>#F4E8CB</code> tx icon</div></div>
+  <div class="swatch"><div class="chip" style="background:#FFFFFF;border:1px solid #ECE7DA"></div><div class="meta"><strong>white</strong><code>#FFFFFF</code> cards</div></div>
+</div>
+
+<h2>Text & muted</h2>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#1E2F22"></div><div class="meta"><strong>ink (headings)</strong><code>#1E2F22</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#3A3E37"></div><div class="meta"><strong>body</strong><code>#3A3E37</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#6E6A5E"></div><div class="meta"><strong>muted-500</strong><code>#6E6A5E</code> .subtle</div></div>
+  <div class="swatch"><div class="chip" style="background:#8A8576"></div><div class="meta"><strong>muted-400</strong><code>#8A8576</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#ECE7DA"></div><div class="meta"><strong>muted-100</strong><code>#ECE7DA</code> borders</div></div>
+</div>
+
+<h2>Semantic</h2>
+<div class="grid">
+  <div class="swatch"><div class="chip" style="background:#E9F2EA"></div><div class="meta"><strong>success-50</strong><code>#E9F2EA</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#3F7A45"></div><div class="meta"><strong>success-500</strong><code>#3F7A45</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#FDF3E1"></div><div class="meta"><strong>warn-50</strong><code>#FDF3E1</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#C07F3E"></div><div class="meta"><strong>warn-500</strong><code>#C07F3E</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#FBEAEA"></div><div class="meta"><strong>danger-50</strong><code>#FBEAEA</code></div></div>
+  <div class="swatch"><div class="chip" style="background:#B83A3A"></div><div class="meta"><strong>danger-500</strong><code>#B83A3A</code></div></div>
+</div>
+
+</body>
+</html>

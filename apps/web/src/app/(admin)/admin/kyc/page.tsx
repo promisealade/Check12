@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../lib/api/client';
+import { Icon } from '../../../../lib/icons';
 
 interface KycQueueItem {
   docId: string;
@@ -20,12 +21,12 @@ export default function AdminKycPage() {
 
   const { data: queue = [], isLoading } = useQuery<KycQueueItem[]>({
     queryKey: ['admin-kyc-queue'],
-    queryFn: async () => (await apiClient.get('/admin/kyc-queue')).data,
+    queryFn: async () => (await apiClient.get<KycQueueItem[]>('/admin/kyc-queue')).data,
   });
 
   const review = useMutation({
-    mutationFn: ({ docId, decision, notes }: { docId: string; decision: 'approved' | 'rejected'; notes?: string }) =>
-      apiClient.post(`/admin/kyc/${docId}/review`, { decision, notes }),
+    mutationFn: ({ docId, decision }: { docId: string; decision: 'approved' | 'rejected' }) =>
+      apiClient.post(`/admin/kyc/${docId}/review`, { decision }),
     onSuccess: (_, vars) => {
       setMessage(`Document ${vars.decision}`);
       setError('');
@@ -38,60 +39,56 @@ export default function AdminKycPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">KYC Review Queue</h1>
-        <p className="text-gray-500 text-sm mt-1">{queue.length} documents pending review</p>
+        <h1 className="h1">KYC review queue</h1>
+        <p className="subtle mt-1">{queue.length} document{queue.length === 1 ? '' : 's'} pending review</p>
       </div>
 
-      {message && (
-        <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {message && <div className="alert-success">{message}</div>}
+      {error && <div className="alert-error">{error}</div>}
 
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-20 bg-gray-100 rounded-xl animate-pulse" />
+            <div key={i} className="h-20 bg-white/60 rounded-3xl animate-pulse border border-muted-100" />
           ))}
         </div>
       ) : queue.length === 0 ? (
-        <div className="card text-center py-12 text-gray-400">
-          No documents pending review ✓
+        <div className="card text-center py-12 space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-2xl bg-success-50 text-success-700 flex items-center justify-center">
+            <Icon name="checkCircle" className="w-6 h-6" />
+          </div>
+          <p className="text-sm text-muted-500">All caught up.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {queue.map((item) => (
             <div key={item.docId} className="card flex items-center gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                <Icon name="id" className="w-5 h-5" />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium text-gray-800">{item.email}</p>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                    {item.documentType.replace(/_/g, ' ')}
-                  </span>
+                  <p className="font-medium text-brand-700 truncate">{item.email}</p>
+                  <span className="badge-neutral">{item.documentType.replace(/_/g, ' ')}</span>
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-muted-500 mt-0.5">
                   {item.phone} · Submitted {new Date(item.submittedAt).toLocaleString()}
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
-                  className="text-sm px-3 py-1.5 rounded-lg border border-green-300 text-green-700 hover:bg-green-50 transition-colors"
+                  className="text-sm px-3 py-1.5 rounded-xl border border-green-300 text-success-700 hover:bg-success-50 transition-colors inline-flex items-center gap-1"
                   disabled={review.isPending}
                   onClick={() => review.mutate({ docId: item.docId, decision: 'approved' })}
                 >
-                  Approve
+                  <Icon name="check" className="w-3.5 h-3.5" /> Approve
                 </button>
                 <button
-                  className="text-sm px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 transition-colors"
+                  className="text-sm px-3 py-1.5 rounded-xl border border-red-300 text-danger-700 hover:bg-danger-50 transition-colors inline-flex items-center gap-1"
                   disabled={review.isPending}
                   onClick={() => review.mutate({ docId: item.docId, decision: 'rejected' })}
                 >
-                  Reject
+                  <Icon name="x" className="w-3.5 h-3.5" /> Reject
                 </button>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
+import { Icon } from '../../../lib/icons';
 
 type Currency = 'AFRi' | 'xGHS';
 
@@ -37,23 +38,19 @@ export default function TransferPage() {
   const [error, setError] = useState('');
 
   const lookup = useMutation({
-    mutationFn: () => apiClient.post('/transfers/lookup', { identifier }),
+    mutationFn: () => apiClient.post<RecipientInfo>('/transfers/lookup', { identifier }),
     onSuccess: (res) => {
       setRecipient(res.data);
       setError('');
       setStep('confirm');
     },
-    onError: (err: any) =>
-      setError(err.response?.data?.detail ?? 'Recipient not found'),
+    onError: (err: any) => setError(err.response?.data?.detail ?? 'Recipient not found'),
   });
 
   const send = useMutation({
     mutationFn: () =>
-      apiClient.post('/transfers/send', {
-        recipientIdentifier: identifier,
-        currency,
-        amount,
-        note,
+      apiClient.post<SendResult>('/transfers/send', {
+        recipientIdentifier: identifier, currency, amount, note,
       }),
     onSuccess: (res) => {
       setResult(res.data);
@@ -66,22 +63,34 @@ export default function TransferPage() {
   });
 
   if (step === 'done' && result) {
+    const flagged = result.amlStatus === 'flagged';
     return (
-      <div className="max-w-md mx-auto py-16 px-4 text-center space-y-6">
-        <div className="text-6xl">{result.amlStatus === 'flagged' ? '⚠️' : '✅'}</div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          {result.amlStatus === 'flagged' ? 'Transfer under review' : 'Sent!'}
-        </h2>
-        {result.amlStatus === 'flagged' && (
-          <p className="text-sm text-amber-700 bg-amber-50 rounded-lg px-4 py-2">
-            This transfer has been flagged for AML review. Funds may be held temporarily.
+      <div className="max-w-md mx-auto py-12 px-4 text-center space-y-6">
+        <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${
+          flagged ? 'bg-warn-50 text-warn-700' : 'bg-success-50 text-success-700'
+        }`}>
+          <Icon name={flagged ? 'warning' : 'checkCircle'} className="w-10 h-10" />
+        </div>
+        <div>
+          <h2 className="h1">{flagged ? 'Transfer under review' : 'Sent successfully'}</h2>
+          <p className="subtle mt-1">
+            {flagged
+              ? 'Funds may be held while we review.'
+              : `${parseFloat(result.amount).toFixed(2)} ${result.currency} on its way.`}
           </p>
+        </div>
+        {flagged && (
+          <div className="alert-warning text-left">
+            This transfer was flagged for AML review. Our compliance team will be in touch.
+          </div>
         )}
-        <div className="card text-left space-y-3">
+        <div className="card text-left space-y-2.5">
           <Row label="To" value={recipient?.displayName ?? ''} />
           <Row label="Amount" value={`${parseFloat(result.amount).toFixed(2)} ${result.currency}`} />
           <Row label="Fee" value={`${parseFloat(result.fee).toFixed(2)} ${result.currency}`} />
-          <Row label="New balance" value={`${parseFloat(result.newBalance).toFixed(2)} ${result.currency}`} bold />
+          <div className="border-t border-muted-100 pt-2.5">
+            <Row label="New balance" value={`${parseFloat(result.newBalance).toFixed(2)} ${result.currency}`} bold />
+          </div>
         </div>
         <button className="btn-primary w-full" onClick={() => router.replace('/wallet')}>
           Back to wallet
@@ -93,15 +102,15 @@ export default function TransferPage() {
   return (
     <div className="max-w-md mx-auto py-8 px-4 space-y-6">
       <div>
-        <button onClick={() => router.back()} className="text-sm text-gray-400 hover:text-gray-600 mb-4 block">
-          ← Back
+        <button onClick={() => router.back()} className="btn-ghost -ml-3 mb-2">
+          <Icon name="back" className="w-4 h-4" /> Back
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Send money</h1>
-        <p className="text-gray-500 text-sm mt-1">Transfer AFRi or xGHS to another user</p>
+        <h1 className="h1">Send money</h1>
+        <p className="subtle mt-1">Transfer AFRi or xGHS to another user.</p>
       </div>
 
       {step === 'lookup' && (
-        <div className="space-y-4">
+        <div className="card space-y-4">
           <div>
             <label className="label" htmlFor="identifier">Recipient phone or email</label>
             <input
@@ -113,45 +122,50 @@ export default function TransferPage() {
               className="input"
             />
           </div>
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
-          )}
+          {error && <div className="alert-error">{error}</div>}
           <button
             className="btn-primary w-full"
             disabled={!identifier || lookup.isPending}
             onClick={() => lookup.mutate()}
           >
             {lookup.isPending ? 'Looking up…' : 'Find recipient'}
+            <Icon name="arrowUpRight" className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {step === 'confirm' && recipient && (
-        <div className="space-y-4">
-          {/* Recipient card */}
-          <div className="card bg-gray-50 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+        <div className="card space-y-5">
+          {/* Recipient */}
+          <div className="rounded-2xl bg-parchment/70 border border-muted-100 p-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-semibold text-sm">
               {recipient.displayName[0]?.toUpperCase()}
             </div>
-            <div>
-              <p className="font-medium text-gray-800">{recipient.displayName}</p>
-              <p className="text-xs text-gray-400">{recipient.phone} · Tier {recipient.tier}</p>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-brand-700 truncate">{recipient.displayName}</p>
+              <p className="text-xs text-muted-500">
+                {recipient.phone} · Tier {recipient.tier}
+              </p>
             </div>
-            <button onClick={() => { setStep('lookup'); setRecipient(null); setError(''); }} className="ml-auto text-xs text-gray-400 hover:text-gray-600">
+            <button
+              onClick={() => { setStep('lookup'); setRecipient(null); setError(''); }}
+              className="btn-ghost text-xs"
+            >
               Change
             </button>
           </div>
 
-          {/* Currency */}
           <div>
             <label className="label">Currency</label>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {(['AFRi', 'xGHS'] as Currency[]).map((c) => (
                 <button
                   key={c}
                   onClick={() => setCurrency(c)}
-                  className={`flex-1 py-3 rounded-xl border text-sm font-semibold transition-colors ${
-                    currency === c ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-gray-200 text-gray-500'
+                  className={`flex-1 py-3 rounded-2xl border text-sm font-semibold transition-colors ${
+                    currency === c
+                      ? 'border-brand-500 bg-brand-50 text-brand-700'
+                      : 'border-muted-200 text-muted-500 hover:border-muted-300'
                   }`}
                 >
                   {c}
@@ -160,11 +174,12 @@ export default function TransferPage() {
             </div>
           </div>
 
-          {/* Amount */}
           <div>
             <label className="label" htmlFor="amount">Amount</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">{currency}</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-400 text-sm font-medium">
+                {currency}
+              </span>
               <input
                 id="amount"
                 type="number"
@@ -173,18 +188,18 @@ export default function TransferPage() {
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="input pl-16"
+                className="input pl-16 tabular-nums"
               />
             </div>
             {amount && parseFloat(amount) > 0 && (
-              <p className="text-xs text-gray-400 mt-1">
-                Fee: {(parseFloat(amount) * 0.005).toFixed(4)} {currency} (0.5%) ·
-                Total: {(parseFloat(amount) * 1.005).toFixed(4)} {currency}
+              <p className="text-xs text-muted-500 mt-1.5 tabular-nums">
+                Fee {(parseFloat(amount) * 0.005).toFixed(4)} {currency} (0.5%)
+                <span className="text-muted-300 mx-1.5">·</span>
+                Total {(parseFloat(amount) * 1.005).toFixed(4)} {currency}
               </p>
             )}
           </div>
 
-          {/* Note */}
           <div>
             <label className="label" htmlFor="note">Note (optional)</label>
             <input
@@ -197,9 +212,7 @@ export default function TransferPage() {
             />
           </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
-          )}
+          {error && <div className="alert-error">{error}</div>}
 
           <button
             className="btn-primary w-full"
@@ -207,6 +220,7 @@ export default function TransferPage() {
             onClick={() => send.mutate()}
           >
             {send.isPending ? 'Sending…' : `Send ${currency}`}
+            <Icon name="send" className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -217,8 +231,10 @@ export default function TransferPage() {
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className={bold ? 'font-bold text-gray-900' : 'text-gray-800'}>{value}</span>
+      <span className="text-muted-500">{label}</span>
+      <span className={`tabular-nums ${bold ? 'font-semibold text-brand-700' : 'text-brand-700'}`}>
+        {value}
+      </span>
     </div>
   );
 }

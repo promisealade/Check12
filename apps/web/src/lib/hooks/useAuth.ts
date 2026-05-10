@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { apiClient, setTokens, clearTokens, getRefreshToken } from '../api/client';
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore, type User } from '../stores/auth.store';
 
 export interface RegisterPayload {
   phone: string;
@@ -92,7 +92,7 @@ export function useAuth() {
   return { register, verifyPhone, resendOtp, login, verifyMfa, logout };
 }
 
-async function fetchProfile() {
-  const { data } = await apiClient.get('/users/me');
+async function fetchProfile(): Promise<User> {
+  const { data } = await apiClient.get<User>('/users/me');
   return data;
 }

@@ -1,126 +1,71 @@
-# Afrione
+# Afrione (frontend prototype)
 
-Regulated dual-stablecoin VASP platform for cross-border payments, digital savings, and business collections across Africa.
+Regulated dual-stablecoin VASP concept for cross-border payments, digital savings, and business collections across Africa.
 
 **Stablecoins:** AFRi (USD-pegged, gold-backed) · xGHS (Ghana Cedi-pegged 1:1)
 
+This repo contains the Next.js web UI only — the original NestJS backend has been removed and replaced with an in-browser mock that persists to `localStorage`. Everything works offline; no Docker, no Postgres, no Redis.
+
 ---
 
-## Quick Start
-
-### Prerequisites
-
-- [Node.js 20+](https://nodejs.org)
-- [pnpm 9+](https://pnpm.io/installation) — `npm install -g pnpm`
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-### 1. Clone and install
+## Quick start
 
 ```bash
-git clone <repo-url> afrione
-cd afrione
 pnpm install
-```
-
-### 2. Set up environment files
-
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
-```
-
-### 3. Start infrastructure (PostgreSQL + Redis)
-
-```bash
-docker compose up postgres redis -d
-```
-
-### 4. Run database migrations and seed
-
-```bash
-pnpm db:migrate
-pnpm db:seed
-```
-
-### 5. Start development servers
-
-```bash
 pnpm dev
+# open http://localhost:3000
 ```
 
-- **Web app:** http://localhost:3000
-- **API:** http://localhost:3001
-- **Swagger docs:** http://localhost:3001/api/docs
+Requires Node 20+ and pnpm 9+ (`corepack enable && corepack prepare pnpm@9.0.0 --activate`).
 
----
-
-## Project Structure
+## Project structure
 
 ```
 afrione/
-├── apps/
-│   ├── api/          # NestJS backend (port 3001)
-│   └── web/          # Next.js frontend (port 3000)
-├── packages/
-│   └── shared-types/ # Shared TypeScript types (DTOs)
-├── docs/             # BMAD planning documents
-├── docker-compose.yml
-├── turbo.json        # Turborepo task config
-└── pnpm-workspace.yaml
+├── apps/web/          # Next.js 14 frontend (port 3000)
+│   └── src/lib/api/
+│       ├── client.ts  # apiClient surface — same shape as the original axios client
+│       └── mock.ts    # in-memory backend (~38 routes, persists to localStorage)
+├── docs/              # original PRD, architecture, sprint plan (full-stack design)
+├── bmad/              # BMAD workflow config
+└── turbo.json
 ```
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 14 (App Router, TypeScript, Tailwind CSS) |
-| Backend | NestJS 10 (TypeScript, TypeORM) |
-| Database | PostgreSQL 16 + Redis 7 |
-| Monorepo | Turborepo + pnpm workspaces |
-
-## Common Commands
+## Common commands
 
 ```bash
-pnpm dev              # Start all apps in dev mode
-pnpm build            # Build all apps
-pnpm test             # Run all tests
-pnpm test:coverage    # Run tests with coverage report
-pnpm lint             # Lint all packages
-pnpm format           # Format all files with Prettier
-pnpm type-check       # TypeScript check all packages
-pnpm db:migrate       # Run database migrations
-pnpm db:seed          # Seed database with demo data
-pnpm db:reset         # Drop, migrate, and re-seed database
+pnpm dev          # Next.js dev server
+pnpm build        # next build
+pnpm lint         # next lint
+pnpm type-check   # tsc --noEmit
+pnpm test         # jest
+pnpm format       # prettier --write
 ```
 
-## Seed Accounts (after `pnpm db:seed`)
+## Demo accounts
 
-| Role | Email | Password | Tier |
-|------|-------|----------|------|
-| Individual (Tier 2) | amara@example.com | Password123! | 2 |
-| Individual (Tier 1) | kofi@example.com | Password123! | 1 |
-| Business (approved) | akosua@sme.com | Password123! | 2 |
-| Admin | admin@afrione.com | Admin@afrione! | — |
+| Role | Email | Password |
+|------|-------|----------|
+| Individual (Tier 2) | amara@example.com | Password123! |
+| Individual (Tier 1) | kofi@example.com | Password123! |
+| Business (approved) | akosua@sme.com | Password123! |
+| Admin | admin@afrione.com | Admin@afrione! |
 
-## Mock Integration Behaviour
+To wipe demo data: clear `localStorage` for `localhost:3000` (the key is `afrione_mock_db_v1`).
 
-| Integration | Mock Behaviour |
-|-------------|---------------|
-| Smile ID KYC | 3s delay → auto-approve (reject if ID ends with `FAIL`) |
-| Mobile Money | 3s delay → success (fail if phone ends with `000`) |
-| Exchange Rate | 1 AFRi = 16.5 xGHS ± 0.2% drift, refreshes every 30s |
-| Gold Custodian | Static: 52.3 oz gold @ $2,340.50/oz |
-| Email/SMS | Logged to console in development |
+## What the mock simulates
 
-## Architecture
+- **Auth** — register, login (any 6-digit MFA code passes), refresh, `/users/me`
+- **Wallet** — AFRi + xGHS balances computed from an event-sourced ledger
+- **Funding** — mock MoMo / bank on-ramp (phone ending `000` declines)
+- **Transfers** — peer-to-peer with 0.5% fee; ≥1000 AFRi or ≥16500 xGHS auto-flags AML
+- **Conversion** — AFRi ↔ xGHS at ~16.5 with small drift, 0.8% fee
+- **KYC / KYB** — submission auto-approves and updates tier
+- **Savings** — goals, deposit, withdraw
+- **Collections** — payment links with public `/pay/<code>` page
+- **Notifications** — generated for every meaningful action
+- **Admin** — metrics, KYC review queue, AML alerts (clear / escalate / file SAR), reserve reconciliation history
 
-See [`docs/architecture-afrione-2026-05-09.md`](docs/architecture-afrione-2026-05-09.md) for the full system design.
+## Original architecture
 
-## Planning Documents
-
-| Document | Path |
-|----------|------|
-| Product Brief | `docs/product-brief-afrione-2026-05-09.md` |
-| PRD | `docs/prd-afrione-2026-05-09.md` |
-| Architecture | `docs/architecture-afrione-2026-05-09.md` |
-| Sprint Plan | `docs/sprint-plan-afrione-2026-05-09.md` |
+The PRD and architecture documents in `docs/` describe the production system as originally planned (NestJS modular monolith, PostgreSQL ledger, Redis idempotency, Celo settlement, Smile ID/Paystack/Fireblocks integrations). None of that is running here — it's reference material for what a real implementation would look like.
