@@ -59,7 +59,7 @@ const ENDPOINTS: EndpointDemo[] = [
 ];
 
 export default function ApiDemoPage() {
-  const [responses, setResponses] = useState<Record<string, { data?: unknown; error?: string; loading?: boolean }>>({});
+  const [responses, setResponses] = useState<Record<string, { data?: object; error?: string; loading?: boolean }>>({});
 
   async function runEndpoint(ep: EndpointDemo) {
     const key = ep.path;
