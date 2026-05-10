@@ -517,6 +517,7 @@ export async function handleRequest(
   // ── transfers ───────────────────────────────────────────────────────────
   if (m === 'POST' && path === '/transfers/lookup') return lookupRecipient(authUserId, body as any);
   if (m === 'POST' && path === '/transfers/send') return sendTransfer(authUserId, body as any);
+  if (m === 'POST' && path === '/transfers/send-external') return sendExternal(authUserId, body as any);
 
   // ── kyc / kyb ──────────────────────────────────────────────────────────
   if (m === 'GET' && path === '/kyc/status') return kycStatus(authUserId);
@@ -928,6 +929,69 @@ function sendTransfer(
       currency: body.currency,
       newBalance: balanceOf(senderWallet.id).toFixed(8),
       amlStatus: flagged ? 'flagged' : 'clean',
+    },
+  };
+}
+
+function sendExternal(
+  authUserId: string | null,
+  body: {
+    currency: Currency;
+    amount: string;
+    destType: 'momo' | 'bank';
+    momoNetwork?: string;
+    momoPhone?: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
+    note?: string;
+  },
+): MockResponse {
+  const u = requireUser(authUserId);
+  const amount = parseFloat(body.amount);
+  if (!Number.isFinite(amount) || amount <= 0) throw new MockHttpError(400, 'Invalid amount');
+
+  const fee = Math.max(0.01, amount * 0.005);
+  const total = amount + fee;
+  const wallet = walletByCurrency(u.id, body.currency);
+  if (!wallet) throw new MockHttpError(404, 'Wallet not found');
+  if (balanceOf(wallet.id) < total) {
+    throw new MockHttpError(400, `Insufficient balance. Need ${total.toFixed(2)} ${body.currency}`);
+  }
+
+  if (body.destType === 'momo' && body.momoPhone?.endsWith('000')) {
+    throw new MockHttpError(402, 'Mobile money provider declined the transaction');
+  }
+
+  const counterparty =
+    body.destType === 'momo'
+      ? `${body.momoPhone} (${providerLabel(body.momoNetwork ?? '')})`
+      : `${body.accountName} — ${body.bankName} ${body.accountNumber}`;
+
+  const flagThreshold = body.currency === 'AFRi' ? 1000 : 16500;
+  const flagged = amount >= flagThreshold;
+
+  db().ledger.push({ walletId: wallet.id, direction: 'debit', amount: total });
+
+  const txnId = uid();
+  db().transactions.push({
+    id: txnId, userId: u.id, walletId: wallet.id, type: 'withdrawal',
+    status: 'completed', amount: amount.toFixed(8), currency: body.currency,
+    fee: fee.toFixed(8), counterpartyDisplay: counterparty,
+    amlStatus: flagged ? 'flagged' : 'clean',
+    settledAt: nowISO(), createdAt: nowISO(),
+  });
+
+  persist();
+  return {
+    data: {
+      transactionId: txnId,
+      amount: amount.toFixed(8),
+      fee: fee.toFixed(8),
+      currency: body.currency,
+      newBalance: balanceOf(wallet.id).toFixed(8),
+      amlStatus: flagged ? 'flagged' : 'clean',
+      counterparty,
     },
   };
 }
