@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'AfriOne — Dual Stablecoin Platform',
   description: 'Cross-border payments, digital savings, and business collections across Africa',
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.ico' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

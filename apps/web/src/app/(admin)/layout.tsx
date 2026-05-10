@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuthStore } from '../../lib/stores/auth.store';
@@ -38,8 +39,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="bg-gray-900 text-white sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/admin/metrics" className="font-bold text-white text-lg tracking-tight">
-              AfriOne Admin
+            <Link href="/admin/metrics" className="flex items-center gap-2">
+              <Image src="/logo-square.png" alt="AfriOne" width={26} height={26} className="rounded-sm brightness-0 invert" />
+              <span className="font-bold text-white text-lg tracking-tight">AfriOne Admin</span>
             </Link>
             <span className="text-xs bg-amber-500 text-gray-900 font-semibold px-2 py-0.5 rounded">
               ADMIN
