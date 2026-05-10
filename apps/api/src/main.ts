@@ -44,7 +44,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  console.info(`Check12 API running on port ${port}`);
+  console.info(`AfriOne API running on port ${port}`);
 }
 
 bootstrap();

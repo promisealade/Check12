@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const BCRYPT_ROUNDS = 10;
 const DEFAULT_PASSWORD = 'Password123!';
-const ADMIN_PASSWORD = 'Admin@check12!';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'Admin@afrione1!';
 
 async function seed() {
   await AppDataSource.initialize();
@@ -34,7 +34,7 @@ async function seed() {
         ('${yaaId}',   '+233244000003', 'yaa@example.com',   '${pwHash}', 'individual', 'user', 0, 'pending',  'not_started', false),
         ('${akosuaId}','+233244000004', 'akosua@sme.com',    '${pwHash}', 'business',   'business', 2, 'approved', 'approved', true),
         ('${kwabenId}','+233244000005', 'kwaben@sme.com',    '${pwHash}', 'business',   'business', 0, 'pending',  'pending',  true),
-        ('${adminId}', '+233244000099', 'admin@check12.com', '${adminHash}', 'individual', 'admin', 2, 'approved', 'not_started', true)
+        ('${adminId}', '+233244000099', 'admin@afrione.com', '${adminHash}', 'individual', 'admin', 2, 'approved', 'not_started', true)
     `);
 
     await qr.query(`
@@ -186,7 +186,7 @@ async function seed() {
     console.info('  Individual (Tier 0): yaa@example.com    / Password123!');
     console.info('  Business (approved): akosua@sme.com     / Password123!');
     console.info('  Business (pending):  kwaben@sme.com     / Password123!');
-    console.info('  Admin:               admin@check12.com  / Admin@check12!');
+    console.info('  Admin:               admin@afrione.com  / Admin@afrione1!');
 
   } catch (err) {
     await qr.rollbackTransaction();

@@ -6,19 +6,28 @@ import { ConfigService } from '@nestjs/config';
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        database: config.get('DB_NAME', 'check12_dev'),
-        username: config.get('DB_USER', 'check12'),
-        password: config.get('DB_PASSWORD', 'check12password'),
-        ssl: config.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
-        entities: [__dirname + '/entities/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        synchronize: false,
-        logging: config.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (config: ConfigService) => {
+        const isProd = config.get('NODE_ENV') === 'production';
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        const connection = databaseUrl
+          ? { url: databaseUrl }
+          : {
+              host: config.get('DB_HOST', 'localhost'),
+              port: config.get<number>('DB_PORT', 5432),
+              database: config.get('DB_NAME', 'afrione'),
+              username: config.get<string>('DB_USER'),
+              password: config.get<string>('DB_PASSWORD'),
+            };
+        return {
+          type: 'postgres' as const,
+          ...connection,
+          ssl: isProd || config.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+          entities: [__dirname + '/entities/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          synchronize: false,
+          logging: !isProd,
+        };
+      },
     }),
   ],
 })

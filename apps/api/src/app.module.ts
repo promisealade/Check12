@@ -17,6 +17,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AmlModule } from './modules/aml/aml.module';
 import { KycModule } from './modules/kyc/kyc.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RedisModule } from './modules/redis/redis.module';
     AdminModule,
     AmlModule,
   ],
+  controllers: [HealthController],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
